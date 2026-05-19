@@ -34,13 +34,10 @@
 
 ## 📄 Лицензия
 
-MIT — используйте и модифицируйте свободно.
+MIT License
 
-## 👤 Автор
-
-[GitHub](https://github.com/iviktoriia)
+Copyright (c) 2026 Viktoriia Ivanova (iviktoriia) [GitHub](https://github.com/iviktoriia)
 
 ---
 
-⭐ Если проект оказался полезным, поставьте звезду на GitHub!
-
+Важное примечание: Данный проект создан исключительно в образовательных/личных целях.
