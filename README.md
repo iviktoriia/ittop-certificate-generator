@@ -36,7 +36,7 @@
 
 MIT License
 
-Copyright (c) 2026 Viktoriia Ivanova (iviktoriia) [GitHub](https://github.com/iviktoriia)
+Copyright (c) 2026 Viktoriia Ivanova (iviktoriia)
 
 ---
 
