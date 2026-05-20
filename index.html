@@ -5,13 +5,12 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
     <title>Генератор сертификатов</title>
     
-    <!-- Библиотеки для скачивания -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
 
     <style>
-        @import url('https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;500;600;700&family=Roboto:wght@400;700&family=Great+Vibes&family=Allura&family=Tangerine:wght@400;700&family=Pacifico&family=Dancing+Script:wght@400;700&family=Bad+Script&family=Caveat:wght@400;500;600;700&display=swap');
+        @import url('https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;500;600;700&family=Roboto:wght@400;700&family=Caveat:wght@400;500;600;700&display=swap');
 
         * { margin: 0; padding: 0; box-sizing: border-box; }
 
@@ -128,8 +127,12 @@
             width: 100%;
         }
 
+        /* Контейнер сертификата — всегда фиксированная ширина для корректного рендера */
         .cert-page {
             width: 210mm;
+            min-width: 210mm;
+            max-width: 210mm;
+            height: 297mm;
             min-height: 297mm;
             margin: 0 auto 30px auto;
             background: transparent;
@@ -138,8 +141,26 @@
             overflow: hidden;
         }
 
+        /* Для мобильных устройств — горизонтальный скролл вместо масштабирования */
+        @media (max-width: 220mm) {
+            .certificates-container {
+                overflow-x: auto;
+                align-items: flex-start;
+            }
+            .cert-page {
+                margin-left: auto;
+                margin-right: auto;
+            }
+        }
+
         .cert-mka5 {
             background: url('cert_mka5_bg.png') no-repeat center center;
+            background-size: cover;
+            color: white;
+        }
+
+        .cert-mka3 {
+            background: url('cert_mka3_bg.png') no-repeat center center;
             background-size: cover;
             color: white;
         }
@@ -203,12 +224,13 @@
         }
 
         .recipient-name {
-            font-family: 'Caveat', 'Bad Script', 'Great Vibes', 'Allura', 'Tangerine', 'Dancing Script', 'Pacifico', cursive;
+            font-family: 'Caveat', cursive;
             font-weight: 400;
             font-size: 3.2rem;
             margin: 5px 0 0 0;
-            line-height: 1;
+            line-height: 1.2;
             word-break: break-word;
+            max-width: 100%;
         }
 
         .name-underline {
@@ -216,7 +238,7 @@
             max-width: 500px;
             min-width: 240px;
             height: 2px;
-            margin: 8px auto 20px auto;
+            margin: 0px auto 20px auto;
             background: currentColor;
         }
 
@@ -269,11 +291,52 @@
             .admin-panel, .delete-btn-wrapper, .action-bar { display: none !important; }
         }
 
-        @media (max-width: 700px) {
-            .cert-page { width: 100%; }
-            .certificate { padding: 30px 20px; }
-            .cert-title { font-size: 2.4rem; }
-            .recipient-name { font-size: 2.1rem; }
+        /* Оверлей загрузки */
+        #loadingOverlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.85);
+            display: none;
+            align-items: center;
+            justify-content: center;
+            z-index: 9999;
+            font-family: 'Montserrat', sans-serif;
+        }
+        
+        #loadingOverlay > div {
+            text-align: center;
+            background: rgba(0,0,0,0.7);
+            padding: 30px 40px;
+            border-radius: 24px;
+            min-width: 280px;
+        }
+
+        #loadingMessage {
+            color: #fff;
+        }
+        
+        .spinner {
+            width: 50px;
+            height: 50px;
+            border: 4px solid rgba(255,255,255,0.3);
+            border-top-color: #fff;
+            border-radius: 50%;
+            margin: 0 auto 20px auto;
+            animation: spin 0.8s linear infinite;
+        }
+        
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+        
+        .progress-text {
+            font-size: 0.9rem;
+            margin-top: 12px;
+            opacity: 0.9;
+            color: #fff;
         }
     </style>
 </head>
@@ -287,6 +350,10 @@
             <textarea id="listMka5" rows="5" placeholder="Введите имена (каждое с новой строки)"></textarea>
         </div>
         <div class="list-card">
+            <h3>🎓 Программа «МКА3»</h3>
+            <textarea id="listMka3" rows="5" placeholder="Введите имена (каждое с новой строки)"></textarea>
+        </div>
+        <div class="list-card">
             <h3>🌟 Программа «Первый Шаг»</h3>
             <textarea id="listFirstStep" rows="5" placeholder="Введите имена (каждое с новой строки)"></textarea>
         </div>
@@ -297,6 +364,8 @@
             <button class="btn btn-primary" id="generateBtn">✨ Создать сертификаты</button>
             <button class="btn btn-outline" id="sampleBtn">📋 Пример имён</button>
             <button class="btn btn-outline" id="clearAllBtn">🗑 Очистить всё</button>
+            <button class="btn btn-outline" id="pdfDownloadBtn">📥 Скачать PDF</button>
+            <button class="btn btn-outline" id="pngDownloadBtn">📥 PNG (ZIP)</button>
         </div>
         <div class="counter" id="counterDisplay">Сертификатов: 0</div>
     </div>
@@ -307,7 +376,7 @@
 </div>
 
 <script>
-const WHITE_LOGO_SVG = `<svg width="60" height="49" viewBox="0 0 60 49" fill="none" xmlns="http://www.w3.org/2000/svg">
+const WHITE_LOGO_SVG = `<svg width="160" height="130" viewBox="0 0 60 49" fill="none" xmlns="http://www.w3.org/2000/svg">
 <path d="M32.5322 0.0557399C32.4899 0.0874579 32.4582 0.975562 32.4582 2.01168V3.89362H44.2467H56.0353L56.0564 14.3817C56.0564 20.1544 56.0775 24.9227 56.0881 24.9861C56.1093 25.039 56.1198 25.1764 56.1304 25.2821C56.141 25.4513 56.289 25.4619 58.0758 25.4407L60 25.409V12.7218V0.0345945L46.2978 0.00287652C38.7701 -0.00769615 32.5639 0.0134492 32.5322 0.0557399Z" fill="#D91842"/>
 <path d="M2.74904 8.21795V10.121L1.40631 10.1527L0.0530063 10.1845L0.0212883 11.6646C-0.0210023 13.8003 -0.147874 13.6206 1.42745 13.6206H2.74904V16.4541C2.74904 18.9915 2.77018 19.3615 2.97106 20.0699C3.51027 22.0259 4.74727 23.3686 6.49176 23.8972C7.6759 24.2461 9.53669 24.1827 10.8371 23.7386C11.7887 23.4109 12.8882 22.8505 12.9622 22.6602C12.9939 22.5756 12.8036 22.0259 12.5287 21.4232C12.2539 20.8206 11.9367 20.1333 11.831 19.8796L11.6406 19.4355L10.8688 19.8267C10.2133 20.1651 9.97016 20.2285 9.29351 20.2602C8.24682 20.3131 7.82391 20.1228 7.42215 19.4461L7.13669 18.9598L7.10497 16.2955L7.06268 13.6206L9.00805 13.5994L10.9428 13.5677V11.8761V10.1845L9.01863 10.1527L7.08383 10.1316L7.06268 8.24966L7.03096 6.3783L4.89529 6.34658L2.74904 6.32544V8.21795Z" fill="white"/>
 <path d="M19.9507 9.98338C17.2019 10.5966 15.0345 12.4468 14.2098 14.8891C14.0512 15.3437 14.0089 15.7878 14.0089 16.8979C14.0089 18.6318 14.2204 19.4248 14.9922 20.6089C16.5569 22.9772 19.2952 24.3199 22.2556 24.1508C25.5648 23.971 28.1974 22.1525 29.2335 19.3296C29.6142 18.3041 29.7199 16.4961 29.4556 15.386C28.8846 12.9754 26.9076 11.0089 24.1587 10.1314C23.1754 9.81422 21.0186 9.74021 19.9507 9.98338ZM23.2177 13.5464C24.4864 14.1913 25.1736 15.6715 25.0256 17.4054C24.941 18.3781 24.6662 19.0547 24.1058 19.6785C23.4503 20.408 22.7948 20.7041 21.7798 20.7041C20.7754 20.7041 20.1305 20.4186 19.4433 19.6785C18.756 18.949 18.5552 18.3041 18.5552 16.8979C18.5657 15.9041 18.5974 15.7138 18.8723 15.1217C19.2318 14.3182 19.9507 13.631 20.6908 13.3772C21.4309 13.1129 22.5199 13.1869 23.2177 13.5464Z" fill="white"/>
@@ -324,16 +393,9 @@ const WHITE_LOGO_SVG = `<svg width="60" height="49" viewBox="0 0 60 49" fill="no
 <path d="M38.252 38.3287C38.2309 38.3815 38.2309 39.1639 38.252 40.0732L38.2838 41.7437H38.6432H39.0133V41.0564V40.3692H39.5948H40.1763V41.0564V41.7437H40.5463H40.9163V39.9886V38.2441L40.5252 38.2758L40.1234 38.3075L40.1551 38.8573C40.1868 39.3225 40.1657 39.4177 39.9648 39.5234C39.8485 39.5868 39.5948 39.6291 39.4045 39.608C39.0661 39.5763 39.0661 39.5763 39.0344 38.9102L39.0027 38.2547H38.6432C38.4423 38.2547 38.2732 38.2864 38.252 38.3287Z" fill="white"/>
 <path d="M42.9252 38.519C42.682 39.1639 41.8679 41.5745 41.8679 41.6485C41.8679 41.7014 42.0582 41.7437 42.2908 41.7437C42.6503 41.7437 42.7243 41.7014 42.7771 41.4793C42.8406 41.2362 42.8829 41.215 43.5067 41.215C44.1304 41.215 44.1727 41.2362 44.2362 41.4793C44.289 41.7014 44.363 41.7437 44.7225 41.7437C44.9868 41.7437 45.1454 41.6908 45.1454 41.6062C45.1454 41.5428 44.8917 40.7604 44.5851 39.8934L44.0353 38.3075L43.5278 38.2758C43.0732 38.2441 43.0203 38.2652 42.9252 38.519ZM43.7498 39.904C43.919 40.4961 43.9296 40.4749 43.4961 40.4749C43.2106 40.4749 43.126 40.4326 43.1683 40.3269C43.2 40.2423 43.2846 39.9674 43.3481 39.7243C43.4855 39.2274 43.5701 39.2696 43.7498 39.904Z" fill="white"/>
 <path d="M46.5939 38.572C46.393 38.7518 46.2027 39.0161 46.171 39.1641C46.097 39.5553 46.2767 40.1368 46.5304 40.2954C46.8053 40.4645 46.7842 40.6231 46.4141 41.1623C46.245 41.4161 46.097 41.6487 46.097 41.6804C46.097 41.7121 46.2873 41.7438 46.5199 41.7438C46.9216 41.7438 46.9639 41.7121 47.3128 41.1623C47.5243 40.8451 47.7357 40.5808 47.7886 40.5808C47.8414 40.5808 47.8943 40.8346 47.9155 41.1306L47.9472 41.691L48.3489 41.7227L48.7401 41.7544V40.0099V38.2548H47.8414C47.0062 38.2548 46.9322 38.276 46.5939 38.572ZM47.8943 39.4707C47.8943 39.9253 47.8837 39.9465 47.5877 39.9465C47.2388 39.9465 46.9428 39.7139 46.9428 39.4284C46.9428 39.1535 47.1648 38.9949 47.5454 38.9949C47.8837 38.9949 47.8943 39.0055 47.8943 39.4707Z" fill="white"/>
-<path d="M3.22481 44.2813C3.11909 44.4611 2.11469 47.4849 2.11469 47.6329C2.11469 47.7175 2.25213 47.7703 2.47416 47.7703C2.77019 47.7703 2.86534 47.7175 2.98164 47.4743C3.10852 47.2205 3.18252 47.1888 3.72173 47.1571C4.28208 47.1254 4.32437 47.1465 4.46182 47.4214C4.59926 47.728 5.10675 47.8866 5.29706 47.6963C5.38164 47.6117 4.40895 44.5562 4.23979 44.3659C4.12349 44.2285 3.29882 44.165 3.22481 44.2813ZM3.94376 45.8884L4.11292 46.3959H3.74287C3.37283 46.3959 3.37283 46.3853 3.43627 46.047C3.52085 45.6981 3.69001 45.2963 3.74287 45.3597C3.76402 45.3703 3.8486 45.6135 3.94376 45.8884Z" fill="white"/>
-<path d="M6.39661 44.2599C6.3649 44.2916 6.34375 45.0951 6.34375 46.0467V47.77H6.71379H7.08384V47.0299C7.08384 46.6176 7.12613 46.2898 7.17899 46.2898C7.22128 46.2898 7.4856 46.6176 7.76049 47.0299C8.22568 47.7383 8.26797 47.77 8.66974 47.77C8.90233 47.77 9.09264 47.7383 9.09264 47.7066C9.09264 47.6749 8.82833 47.2625 8.50057 46.7973L7.9085 45.9409L8.45828 45.1586C8.75432 44.7251 8.97634 44.3445 8.9552 44.3128C8.92348 44.2916 8.75432 44.2387 8.57458 44.2176C8.27855 44.1647 8.21511 44.2176 7.76049 44.8308C7.49617 45.2009 7.23185 45.5075 7.18956 45.5286C7.1367 45.5498 7.08384 45.2643 7.06269 44.8943C7.03097 44.2493 7.0204 44.2282 6.74551 44.2176C6.58692 44.207 6.42833 44.2282 6.39661 44.2599Z" fill="white"/>
-<path d="M11.1437 44.2493C11.038 44.3233 9.93845 47.474 9.93845 47.696C9.93845 47.7383 10.1288 47.77 10.3508 47.77C10.7103 47.77 10.7737 47.7277 10.8794 47.4528C10.9746 47.1462 11.0169 47.1357 11.5772 47.1357C12.1481 47.1357 12.1799 47.1568 12.2962 47.4528C12.4019 47.7277 12.4653 47.77 12.8142 47.77C13.0891 47.77 13.216 47.7277 13.216 47.622C13.216 47.5057 12.1799 44.4079 12.1164 44.3128C12.053 44.2387 11.2389 44.1859 11.1437 44.2493ZM11.7781 45.7506C11.8732 46.0467 11.9473 46.3004 11.9473 46.3321C11.9473 46.3639 11.7781 46.3956 11.5666 46.3956C11.2812 46.3956 11.1966 46.3533 11.2389 46.2476C11.2706 46.163 11.3552 45.9092 11.4292 45.6661C11.5032 45.4229 11.5666 45.2326 11.5772 45.2326C11.5984 45.2326 11.6829 45.4652 11.7781 45.7506Z" fill="white"/>
-<path d="M14.7596 44.26C14.7279 44.2917 14.6962 44.7569 14.6962 45.2855C14.6962 46.3745 14.5693 46.882 14.2627 46.956C14.0935 46.9983 14.0618 47.104 14.0618 47.7172V48.415L14.4636 48.3833C14.8019 48.3516 14.8547 48.3093 14.8865 48.0556C14.9182 47.7701 14.9288 47.7701 15.764 47.7701H16.5992V48.0873C16.5992 48.3833 16.6204 48.4045 17.0221 48.4045H17.4451V47.7067C17.4451 47.104 17.4133 46.9983 17.2336 46.956C17.0433 46.9031 17.0221 46.7974 17.001 45.5604L16.9693 44.2283L15.8909 44.2177C15.2988 44.2071 14.7913 44.2283 14.7596 44.26ZM16.2292 45.9728V46.8714L15.764 46.9031C15.3517 46.9349 15.3094 46.9137 15.3728 46.7446C15.4151 46.6388 15.4785 46.2054 15.5103 45.7824L15.5737 45.0106L15.9014 45.0424L16.2292 45.0741V45.9728Z" fill="white"/>
-<path d="M18.4494 44.3129C18.4177 44.3869 18.4071 45.1799 18.4177 46.0786L18.4494 47.7173L19.5384 47.749L20.6168 47.7808V47.3473V46.9244H19.9296C19.2741 46.9244 19.2424 46.9138 19.2424 46.6601C19.2424 46.4275 19.2847 46.4063 19.8556 46.3746L20.4582 46.3429V45.9728V45.6028L19.8556 45.5711C19.2847 45.5394 19.2424 45.5182 19.2424 45.2856C19.2424 45.0319 19.2741 45.0213 19.9402 45.0213H20.6274L20.5957 44.6195L20.564 44.2283L19.5279 44.1966C18.7455 44.1755 18.4812 44.1966 18.4494 44.3129Z" fill="white"/>
-<path d="M21.7164 44.3233C21.6952 44.3868 21.6847 45.1797 21.6952 46.0784L21.727 47.7172H22.097H22.4671L22.5199 46.7656L22.5728 45.8141L22.9745 46.4696C23.1966 46.8396 23.4186 47.1357 23.4715 47.1357C23.5243 47.1357 23.7146 46.8713 23.8944 46.5542C24.0741 46.237 24.2644 45.9515 24.3278 45.9198C24.3807 45.8775 24.423 46.2476 24.423 46.8079V47.77H24.793H25.1631V45.9727V44.1753H24.9093C24.4653 44.1753 24.3384 44.281 23.9261 44.9788C23.7146 45.3489 23.4926 45.6449 23.4503 45.6343C23.408 45.6132 23.1648 45.296 22.9217 44.9154C22.5199 44.3128 22.4248 44.2282 22.1182 44.207C21.9278 44.1965 21.7481 44.2493 21.7164 44.3233Z" fill="white"/>
-<path d="M26.4846 44.2706C26.4212 44.3341 26.3895 45.053 26.4106 46.0786L26.4424 47.7808L26.7278 47.749C26.9498 47.7279 27.1507 47.5164 27.6476 46.8186L28.282 45.9305L28.3349 46.8186L28.3877 47.7173H28.7578H29.1278L29.1595 46.0046C29.1807 44.4081 29.1701 44.2918 28.9904 44.2389C28.652 44.1226 28.4829 44.2601 27.9014 45.127C27.5842 45.5922 27.2987 45.9623 27.2565 45.9728C27.2142 45.9728 27.1719 45.5816 27.1507 45.0953C27.119 44.2601 27.1084 44.2283 26.8547 44.1966C26.7067 44.1755 26.5375 44.2178 26.4846 44.2706Z" fill="white"/>
-<path d="M30.9675 44.3445C30.2062 44.6617 29.9842 45.6343 30.5551 46.2053L30.8829 46.5224L30.5551 47.0194C30.1322 47.6854 30.1428 47.7912 30.6397 47.7489C30.978 47.7172 31.0732 47.6431 31.3798 47.1885C31.8767 46.4484 32.0353 46.4484 32.0353 47.178V47.77H32.4053H32.7754L32.7542 45.9938L32.7225 44.2282L32.0353 44.207C31.6124 44.1859 31.2001 44.2387 30.9675 44.3445ZM32.0353 45.4546V45.8775L31.5912 45.8458C31.2106 45.8141 31.126 45.7718 31.1049 45.5709C31.0415 45.1374 31.1578 45.0211 31.6124 45.0211H32.0353V45.4546Z" fill="white"/>
 </svg>`;
-const BLACK_LOGO_SVG = `<svg width="60" height="49" viewBox="0 0 60 49" fill="none" xmlns="http://www.w3.org/2000/svg">
+
+const BLACK_LOGO_SVG = `<svg width="160" height="130" viewBox="0 0 60 49" fill="none" xmlns="http://www.w3.org/2000/svg">
 <path d="M32.5322 0.0557399C32.4899 0.0874579 32.4582 0.975562 32.4582 2.01168V3.89362H44.2467H56.0353L56.0564 14.3817C56.0564 20.1544 56.0775 24.9227 56.0881 24.9861C56.1093 25.039 56.1198 25.1764 56.1304 25.2821C56.141 25.4513 56.289 25.4619 58.0758 25.4407L60 25.409V12.7218V0.0345945L46.2978 0.00287652C38.7701 -0.00769615 32.5639 0.0134492 32.5322 0.0557399Z" fill="#D91842"/>
 <path d="M2.74904 8.21795V10.121L1.40631 10.1527L0.0530063 10.1845L0.0212883 11.6646C-0.0210023 13.8003 -0.147874 13.6206 1.42745 13.6206H2.74904V16.4541C2.74904 18.9915 2.77018 19.3615 2.97106 20.0699C3.51027 22.0259 4.74727 23.3686 6.49176 23.8972C7.6759 24.2461 9.53669 24.1827 10.8371 23.7386C11.7887 23.4109 12.8882 22.8505 12.9622 22.6602C12.9939 22.5756 12.8036 22.0259 12.5287 21.4232C12.2539 20.8206 11.9367 20.1333 11.831 19.8796L11.6406 19.4355L10.8688 19.8267C10.2133 20.1651 9.97016 20.2285 9.29351 20.2602C8.24682 20.3131 7.82391 20.1228 7.42215 19.4461L7.13669 18.9598L7.10497 16.2955L7.06268 13.6206L9.00805 13.5994L10.9428 13.5677V11.8761V10.1845L9.01863 10.1527L7.08383 10.1316L7.06268 8.24966L7.03096 6.3783L4.89529 6.34658L2.74904 6.32544V8.21795Z" fill="black"/>
 <path d="M19.9507 9.98338C17.2019 10.5966 15.0345 12.4468 14.2098 14.8891C14.0512 15.3437 14.0089 15.7878 14.0089 16.8979C14.0089 18.6318 14.2204 19.4248 14.9922 20.6089C16.5569 22.9772 19.2952 24.3199 22.2556 24.1508C25.5648 23.971 28.1974 22.1525 29.2335 19.3296C29.6142 18.3041 29.7199 16.4961 29.4556 15.386C28.8846 12.9754 26.9076 11.0089 24.1587 10.1314C23.1754 9.81422 21.0186 9.74021 19.9507 9.98338ZM23.2177 13.5464C24.4864 14.1913 25.1736 15.6715 25.0256 17.4054C24.941 18.3781 24.6662 19.0547 24.1058 19.6785C23.4503 20.408 22.7948 20.7041 21.7798 20.7041C20.7754 20.7041 20.1305 20.4186 19.4433 19.6785C18.756 18.949 18.5552 18.3041 18.5552 16.8979C18.5657 15.9041 18.5974 15.7138 18.8723 15.1217C19.2318 14.3182 19.9507 13.631 20.6908 13.3772C21.4309 13.1129 22.5199 13.1869 23.2177 13.5464Z" fill="black"/>
@@ -350,14 +412,6 @@ const BLACK_LOGO_SVG = `<svg width="60" height="49" viewBox="0 0 60 49" fill="no
 <path d="M38.252 38.3287C38.2309 38.3815 38.2309 39.1639 38.252 40.0732L38.2838 41.7437H38.6432H39.0133V41.0564V40.3692H39.5948H40.1763V41.0564V41.7437H40.5463H40.9163V39.9886V38.2441L40.5252 38.2758L40.1234 38.3075L40.1551 38.8573C40.1868 39.3225 40.1657 39.4177 39.9648 39.5234C39.8485 39.5868 39.5948 39.6291 39.4045 39.608C39.0661 39.5763 39.0661 39.5763 39.0344 38.9102L39.0027 38.2547H38.6432C38.4423 38.2547 38.2732 38.2864 38.252 38.3287Z" fill="black"/>
 <path d="M42.9252 38.519C42.682 39.1639 41.8679 41.5745 41.8679 41.6485C41.8679 41.7014 42.0582 41.7437 42.2908 41.7437C42.6503 41.7437 42.7243 41.7014 42.7771 41.4793C42.8406 41.2362 42.8829 41.215 43.5067 41.215C44.1304 41.215 44.1727 41.2362 44.2362 41.4793C44.289 41.7014 44.363 41.7437 44.7225 41.7437C44.9868 41.7437 45.1454 41.6908 45.1454 41.6062C45.1454 41.5428 44.8917 40.7604 44.5851 39.8934L44.0353 38.3075L43.5278 38.2758C43.0732 38.2441 43.0203 38.2652 42.9252 38.519ZM43.7498 39.904C43.919 40.4961 43.9296 40.4749 43.4961 40.4749C43.2106 40.4749 43.126 40.4326 43.1683 40.3269C43.2 40.2423 43.2846 39.9674 43.3481 39.7243C43.4855 39.2274 43.5701 39.2696 43.7498 39.904Z" fill="black"/>
 <path d="M46.5939 38.572C46.393 38.7518 46.2027 39.0161 46.171 39.1641C46.097 39.5553 46.2767 40.1368 46.5304 40.2954C46.8053 40.4645 46.7842 40.6231 46.4141 41.1623C46.245 41.4161 46.097 41.6487 46.097 41.6804C46.097 41.7121 46.2873 41.7438 46.5199 41.7438C46.9216 41.7438 46.9639 41.7121 47.3128 41.1623C47.5243 40.8451 47.7357 40.5808 47.7886 40.5808C47.8414 40.5808 47.8943 40.8346 47.9155 41.1306L47.9472 41.691L48.3489 41.7227L48.7401 41.7544V40.0099V38.2548H47.8414C47.0062 38.2548 46.9322 38.276 46.5939 38.572ZM47.8943 39.4707C47.8943 39.9253 47.8837 39.9465 47.5877 39.9465C47.2388 39.9465 46.9428 39.7139 46.9428 39.4284C46.9428 39.1535 47.1648 38.9949 47.5454 38.9949C47.8837 38.9949 47.8943 39.0055 47.8943 39.4707Z" fill="black"/>
-<path d="M3.22481 44.2813C3.11909 44.4611 2.11469 47.4849 2.11469 47.6329C2.11469 47.7175 2.25213 47.7703 2.47416 47.7703C2.77019 47.7703 2.86534 47.7175 2.98164 47.4743C3.10852 47.2205 3.18252 47.1888 3.72173 47.1571C4.28208 47.1254 4.32437 47.1465 4.46182 47.4214C4.59926 47.728 5.10675 47.8866 5.29706 47.6963C5.38164 47.6117 4.40895 44.5562 4.23979 44.3659C4.12349 44.2285 3.29882 44.165 3.22481 44.2813ZM3.94376 45.8884L4.11292 46.3959H3.74287C3.37283 46.3959 3.37283 46.3853 3.43627 46.047C3.52085 45.6981 3.69001 45.2963 3.74287 45.3597C3.76402 45.3703 3.8486 45.6135 3.94376 45.8884Z" fill="black"/>
-<path d="M6.39661 44.2599C6.3649 44.2916 6.34375 45.0951 6.34375 46.0467V47.77H6.71379H7.08384V47.0299C7.08384 46.6176 7.12613 46.2898 7.17899 46.2898C7.22128 46.2898 7.4856 46.6176 7.76049 47.0299C8.22568 47.7383 8.26797 47.77 8.66974 47.77C8.90233 47.77 9.09264 47.7383 9.09264 47.7066C9.09264 47.6749 8.82833 47.2625 8.50057 46.7973L7.9085 45.9409L8.45828 45.1586C8.75432 44.7251 8.97634 44.3445 8.9552 44.3128C8.92348 44.2916 8.75432 44.2387 8.57458 44.2176C8.27855 44.1647 8.21511 44.2176 7.76049 44.8308C7.49617 45.2009 7.23185 45.5075 7.18956 45.5286C7.1367 45.5498 7.08384 45.2643 7.06269 44.8943C7.03097 44.2493 7.0204 44.2282 6.74551 44.2176C6.58692 44.207 6.42833 44.2282 6.39661 44.2599Z" fill="black"/>
-<path d="M11.1437 44.2493C11.038 44.3233 9.93845 47.474 9.93845 47.696C9.93845 47.7383 10.1288 47.77 10.3508 47.77C10.7103 47.77 10.7737 47.7277 10.8794 47.4528C10.9746 47.1462 11.0169 47.1357 11.5772 47.1357C12.1481 47.1357 12.1799 47.1568 12.2962 47.4528C12.4019 47.7277 12.4653 47.77 12.8142 47.77C13.0891 47.77 13.216 47.7277 13.216 47.622C13.216 47.5057 12.1799 44.4079 12.1164 44.3128C12.053 44.2387 11.2389 44.1859 11.1437 44.2493ZM11.7781 45.7506C11.8732 46.0467 11.9473 46.3004 11.9473 46.3321C11.9473 46.3639 11.7781 46.3956 11.5666 46.3956C11.2812 46.3956 11.1966 46.3533 11.2389 46.2476C11.2706 46.163 11.3552 45.9092 11.4292 45.6661C11.5032 45.4229 11.5666 45.2326 11.5772 45.2326C11.5984 45.2326 11.6829 45.4652 11.7781 45.7506Z" fill="black"/>
-<path d="M14.7596 44.26C14.7279 44.2917 14.6962 44.7569 14.6962 45.2855C14.6962 46.3745 14.5693 46.882 14.2627 46.956C14.0935 46.9983 14.0618 47.104 14.0618 47.7172V48.415L14.4636 48.3833C14.8019 48.3516 14.8547 48.3093 14.8865 48.0556C14.9182 47.7701 14.9288 47.7701 15.764 47.7701H16.5992V48.0873C16.5992 48.3833 16.6204 48.4045 17.0221 48.4045H17.4451V47.7067C17.4451 47.104 17.4133 46.9983 17.2336 46.956C17.0433 46.9031 17.0221 46.7974 17.001 45.5604L16.9693 44.2283L15.8909 44.2177C15.2988 44.2071 14.7913 44.2283 14.7596 44.26ZM16.2292 45.9728V46.8714L15.764 46.9031C15.3517 46.9349 15.3094 46.9137 15.3728 46.7446C15.4151 46.6388 15.4785 46.2054 15.5103 45.7824L15.5737 45.0106L15.9014 45.0424L16.2292 45.0741V45.9728Z" fill="black"/>
-<path d="M18.4494 44.3129C18.4177 44.3869 18.4071 45.1799 18.4177 46.0786L18.4494 47.7173L19.5384 47.749L20.6168 47.7808V47.3473V46.9244H19.9296C19.2741 46.9244 19.2424 46.9138 19.2424 46.6601C19.2424 46.4275 19.2847 46.4063 19.8556 46.3746L20.4582 46.3429V45.9728V45.6028L19.8556 45.5711C19.2847 45.5394 19.2424 45.5182 19.2424 45.2856C19.2424 45.0319 19.2741 45.0213 19.9402 45.0213H20.6274L20.5957 44.6195L20.564 44.2283L19.5279 44.1966C18.7455 44.1755 18.4812 44.1966 18.4494 44.3129Z" fill="black"/>
-<path d="M21.7164 44.3233C21.6952 44.3868 21.6847 45.1797 21.6952 46.0784L21.727 47.7172H22.097H22.4671L22.5199 46.7656L22.5728 45.8141L22.9745 46.4696C23.1966 46.8396 23.4186 47.1357 23.4715 47.1357C23.5243 47.1357 23.7146 46.8713 23.8944 46.5542C24.0741 46.237 24.2644 45.9515 24.3278 45.9198C24.3807 45.8775 24.423 46.2476 24.423 46.8079V47.77H24.793H25.1631V45.9727V44.1753H24.9093C24.4653 44.1753 24.3384 44.281 23.9261 44.9788C23.7146 45.3489 23.4926 45.6449 23.4503 45.6343C23.408 45.6132 23.1648 45.296 22.9217 44.9154C22.5199 44.3128 22.4248 44.2282 22.1182 44.207C21.9278 44.1965 21.7481 44.2493 21.7164 44.3233Z" fill="black"/>
-<path d="M26.4847 44.2706C26.4212 44.3341 26.3895 45.053 26.4107 46.0786L26.4424 47.7808L26.7278 47.749C26.9499 47.7279 27.1508 47.5164 27.6477 46.8186L28.282 45.9305L28.3349 46.8186L28.3878 47.7173H28.7578H29.1278L29.1596 46.0046C29.1807 44.4081 29.1701 44.2918 28.9904 44.2389C28.6521 44.1226 28.4829 44.2601 27.9014 45.127C27.5842 45.5922 27.2988 45.9623 27.2565 45.9728C27.2142 45.9728 27.1719 45.5816 27.1508 45.0953C27.119 44.2601 27.1085 44.2283 26.8547 44.1966C26.7067 44.1755 26.5375 44.2178 26.4847 44.2706Z" fill="black"/>
-<path d="M30.9675 44.3445C30.2063 44.6617 29.9842 45.6343 30.5552 46.2053L30.8829 46.5224L30.5552 47.0194C30.1322 47.6854 30.1428 47.7912 30.6397 47.7489C30.9781 47.7172 31.0732 47.6431 31.3798 47.1885C31.8767 46.4484 32.0353 46.4484 32.0353 47.178V47.77H32.4054H32.7754L32.7543 45.9938L32.7225 44.2282L32.0353 44.207C31.6124 44.1859 31.2001 44.2387 30.9675 44.3445ZM32.0353 45.4546V45.8775L31.5913 45.8458C31.2107 45.8141 31.1261 45.7718 31.1049 45.5709C31.0415 45.1374 31.1578 45.0211 31.6124 45.0211H32.0353V45.4546Z" fill="black"/>
 </svg>`;
 
 let certificates = [];
@@ -387,7 +441,22 @@ function generateCertHTML(name, type) {
                 </div>
                 <div class="year-stamp">${year}</div>
             </div>`;
-    } else {
+    } 
+    else if (type === 'mka3') {
+        return `
+            <div class="certificate cert-mka3">
+                <div class="cert-logo">${WHITE_LOGO_SVG}</div>
+                <div class="cert-content">
+                    <div class="cert-title">СЕРТИФИКАТ</div>
+                    <div class="awarded-text">вручается</div>
+                    <div class="recipient-name">${safeName}</div>
+                    <div class="name-underline"></div>
+                    <div class="program-description">об успешном завершении учебного года<br>в программе «МКА3»<br>Малой Компьютерной Академии ТОП</div>
+                </div>
+                <div class="year-stamp">${year}</div>
+            </div>`;
+    }
+    else {
         return `
             <div class="certificate cert-firststep">
                 <div class="cert-logo">${BLACK_LOGO_SVG}</div>
@@ -401,30 +470,29 @@ function generateCertHTML(name, type) {
                 <div class="year-stamp" style="color: #1e1a2f;">${year}</div>
             </div>`;
     }
-} 
+}
 
-// Обший индикатор
-function showLoadingOverlay(text = "Обработка...") {
+function showLoadingOverlay(message) {
     let overlay = document.getElementById('loadingOverlay');
     if (!overlay) {
         overlay = document.createElement('div');
         overlay.id = 'loadingOverlay';
-        overlay.style.cssText = `
-            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-            background: rgba(0,0,0,0.75); display: none; align-items: center;
-            justify-content: center; z-index: 9999; color: white; font-family: 'Montserrat', sans-serif;
-        `;
         overlay.innerHTML = `
-            <div style="text-align:center;">
-                <div style="font-size:2.2rem;margin-bottom:15px;">⏳</div>
-                <div id="loadingText" style="font-size:1.35rem;">${text}</div>
-                <div style="margin-top:12px;font-size:0.95rem;opacity:0.85;">Пожалуйста, подождите</div>
+            <div>
+                <div class="spinner"></div>
+                <div id="loadingMessage" style="font-size:1.2rem;">Загрузка...</div>
+                <div id="progressDetail" class="progress-text"></div>
             </div>
         `;
         document.body.appendChild(overlay);
     }
-    document.getElementById('loadingText').textContent = text;
+    document.getElementById('loadingMessage').textContent = message || 'Обработка...';
     overlay.style.display = 'flex';
+}
+
+function updateProgressDetail(text) {
+    const progressDiv = document.getElementById('progressDetail');
+    if (progressDiv) progressDiv.textContent = text;
 }
 
 function hideLoadingOverlay() {
@@ -432,126 +500,243 @@ function hideLoadingOverlay() {
     if (overlay) overlay.style.display = 'none';
 }
 
-// PDF 
+// Функция для создания временного контейнера для рендера сертификата в исходном размере
+async function renderCertificateToCanvas(certElement) {
+    // Сохраняем оригинальные стили
+    const originalPosition = certElement.style.position;
+    const originalLeft = certElement.style.left;
+    const originalTop = certElement.style.top;
+    const originalWidth = certElement.style.width;
+    const originalMinWidth = certElement.style.minWidth;
+    const originalMaxWidth = certElement.style.maxWidth;
+    
+    // Временно делаем элемент фиксированного размера для корректного рендера
+    certElement.style.position = 'fixed';
+    certElement.style.left = '-9999px';
+    certElement.style.top = '0';
+    certElement.style.width = '210mm';
+    certElement.style.minWidth = '210mm';
+    certElement.style.maxWidth = '210mm';
+    
+    // Ждём перерисовки
+    await new Promise(resolve => setTimeout(resolve, 50));
+    
+    const canvas = await html2canvas(certElement, {
+        scale: 3,
+        useCORS: true,
+        backgroundColor: '#ffffff',
+        logging: false,
+        windowWidth: certElement.scrollWidth,
+        windowHeight: certElement.scrollHeight
+    });
+    
+    // Восстанавливаем стили
+    certElement.style.position = originalPosition;
+    certElement.style.left = originalLeft;
+    certElement.style.top = originalTop;
+    certElement.style.width = originalWidth;
+    certElement.style.minWidth = originalMinWidth;
+    certElement.style.maxWidth = originalMaxWidth;
+    
+    return canvas;
+}
+
+// PDF генерация
 async function downloadAsPDF() {
-    if (certificates.length === 0) return alert('Нет сертификатов');
-
-    const pdfBtn = document.querySelector('button[onclick*="downloadAsPDF"], .btn-outline');
-    const originalText = pdfBtn ? pdfBtn.innerHTML : '📥 Скачать PDF';
-
-    if (pdfBtn) {
-        pdfBtn.disabled = true;
-        pdfBtn.innerHTML = '⏳ Генерируется PDF...';
-        pdfBtn.style.opacity = '0.7';
+    if (certificates.length === 0) {
+        alert('Нет сертификатов для скачивания');
+        return;
     }
 
-    showLoadingOverlay(`Создаём PDF (${certificates.length} шт.)...`);
+    const pdfBtn = document.getElementById('pdfDownloadBtn');
+    const originalText = pdfBtn.innerHTML;
+    
+    pdfBtn.disabled = true;
+    pdfBtn.innerHTML = '⏳ Генерируется...';
+    
+    showLoadingOverlay(`Создание PDF (${certificates.length} шт.)...`);
 
     try {
         const { jsPDF } = window.jspdf;
-        const pdf = new jsPDF({ orientation: 'portrait', unit: 'mm', format: 'a4', compress: true });
+        const pdf = new jsPDF({
+            orientation: 'portrait',
+            unit: 'mm',
+            format: 'a4',
+            compress: true
+        });
 
         const certElements = document.querySelectorAll('.certificate');
+        const total = certElements.length;
 
-        for (let i = 0; i < certElements.length; i++) {
+        for (let i = 0; i < total; i++) {
+            updateProgressDetail(`Обработка ${i+1} из ${total}...`);
+
             if (i > 0) pdf.addPage();
 
             const cert = certElements[i];
-            const originalShadow = cert.style.boxShadow;
-            const originalBorder = cert.style.border;
 
-            cert.style.boxShadow = 'none';
-            cert.style.border = 'none';
+            // Фиксируем точные размеры A4
+            const originalStyles = {
+                height: cert.style.height,
+                minHeight: cert.style.minHeight,
+                width: cert.style.width
+            };
+
+            cert.style.height = '297mm';
+            cert.style.minHeight = '297mm';
+            cert.style.width = '210mm';
+
+            await new Promise(r => setTimeout(r, 50));
 
             const canvas = await html2canvas(cert, {
                 scale: 4,
                 useCORS: true,
                 backgroundColor: null,
-                logging: false
+                logging: false,
+                allowTaint: true,
+                imageTimeout: 0,
+                removeContainer: true
             });
 
-            cert.style.boxShadow = originalShadow;
-            cert.style.border = originalBorder;
+            // Восстанавливаем стили
+            Object.assign(cert.style, originalStyles);
 
-            const imgData = canvas.toDataURL('image/png', 1.0);
+            // Удаление рамки
+            const ctx = canvas.getContext('2d');
+            const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+            const data = imageData.data;
+
+            let top = 0, bottom = canvas.height, left = 0, right = canvas.width;
+
+            // Находим реальные границы контента (обрезаем белые поля)
+            outer1: for (let y = 0; y < canvas.height; y++) {
+                for (let x = 0; x < canvas.width; x++) {
+                    const idx = (y * canvas.width + x) * 4;
+                    if (data[idx + 3] > 0) { // если есть альфа или цвет
+                        top = y;
+                        break outer1;
+                    }
+                }
+            }
+            outer2: for (let y = canvas.height - 1; y >= 0; y--) {
+                for (let x = 0; x < canvas.width; x++) {
+                    const idx = (y * canvas.width + x) * 4;
+                    if (data[idx + 3] > 0) {
+                        bottom = y + 1;
+                        break outer2;
+                    }
+                }
+            }
+            outer3: for (let x = 0; x < canvas.width; x++) {
+                for (let y = 0; y < canvas.height; y++) {
+                    const idx = (y * canvas.width + x) * 4;
+                    if (data[idx + 3] > 0) {
+                        left = x;
+                        break outer3;
+                    }
+                }
+            }
+            outer4: for (let x = canvas.width - 1; x >= 0; x--) {
+                for (let y = 0; y < canvas.height; y++) {
+                    const idx = (y * canvas.width + x) * 4;
+                    if (data[idx + 3] > 0) {
+                        right = x + 1;
+                        break outer4;
+                    }
+                }
+            }
+
+            // Создаём новый canvas без белых полей
+            const trimmedCanvas = document.createElement('canvas');
+            trimmedCanvas.width = right - left;
+            trimmedCanvas.height = bottom - top;
+            const trimmedCtx = trimmedCanvas.getContext('2d');
+            trimmedCtx.drawImage(canvas, left, top, trimmedCanvas.width, trimmedCanvas.height, 
+                                0, 0, trimmedCanvas.width, trimmedCanvas.height);
+
+            const imgData = trimmedCanvas.toDataURL('image/png', 1.0);
+
             pdf.addImage(imgData, 'PNG', 0, 0, 210, 297);
         }
 
-        pdf.save('Сертификаты.pdf');
+        pdf.save(`Сертификаты_${new Date().toISOString().slice(0,10)}.pdf`);
+
     } catch (err) {
         console.error(err);
         alert('Ошибка при создании PDF');
     } finally {
-        if (pdfBtn) {
-            pdfBtn.disabled = false;
-            pdfBtn.innerHTML = originalText;
-            pdfBtn.style.opacity = '1';
-        }
+        pdfBtn.disabled = false;
+        pdfBtn.innerHTML = originalText;
         hideLoadingOverlay();
     }
 }
 
-// PNG (ZIP) 
+
+// PNG ZIP генерация
 async function downloadAsPNG() {
-    if (certificates.length === 0) return alert('Нет сертификатов');
-
-    const pngBtn = document.querySelector('button[onclick*="downloadAsPNG"], .btn-outline');
-    const originalText = pngBtn ? pngBtn.innerHTML : '📥 PNG (ZIP)';
-
-    if (pngBtn) {
-        pngBtn.disabled = true;
-        pngBtn.innerHTML = '⏳ Создаём архив...';
-        pngBtn.style.opacity = '0.7';
+    if (certificates.length === 0) {
+        alert('Нет сертификатов для скачивания');
+        return;
     }
 
-    showLoadingOverlay(`Создаём PNG + ZIP (${certificates.length} файлов)...`);
-
+    const pngBtn = document.getElementById('pngDownloadBtn');
+    const originalText = pngBtn.innerHTML;
+    
+    pngBtn.disabled = true;
+    pngBtn.innerHTML = '⏳ Создание ZIP...';
+    
+    showLoadingOverlay(`Создание PNG (${certificates.length} файлов)...`);
+    
     try {
         const zip = new JSZip();
         const certs = document.querySelectorAll('.certificate');
-
-        for (let i = 0; i < certs.length; i++) {
-            const canvas = await html2canvas(certs[i], { 
-                scale: 4, 
-                useCORS: true, 
-                backgroundColor: null 
-            });
+        const total = certs.length;
+        
+        for (let i = 0; i < total; i++) {
+            updateProgressDetail(`Обработка ${i+1} из ${total}...`);
+            
+            const canvas = await renderCertificateToCanvas(certs[i]);
+            
             const dataUrl = canvas.toDataURL('image/png').split(',')[1];
             const name = certificates[i].name.replace(/[^а-яА-Яa-zA-Z0-9]/g, '_');
             zip.file(`${name}_сертификат.png`, dataUrl, {base64: true});
         }
-
-        const blob = await zip.generateAsync({type: "blob"});
+        
+        updateProgressDetail('Создание архива...');
+        const blob = await zip.generateAsync({type: "blob", compression: "DEFLATE", compressionOptions: {level: 6}});
+        
         const link = document.createElement('a');
         link.href = URL.createObjectURL(blob);
-        link.download = 'Сертификаты_PNG.zip';
+        link.download = `Сертификаты_PNG_${new Date().toISOString().slice(0,19).replace(/:/g, '-')}.zip`;
         link.click();
+        URL.revokeObjectURL(link.href);
+        
     } catch (err) {
-        console.error(err);
-        alert('Ошибка при создании ZIP');
+        console.error('ZIP generation error:', err);
+        alert('Ошибка при создании ZIP архива');
     } finally {
-        if (pngBtn) {
-            pngBtn.disabled = false;
-            pngBtn.innerHTML = originalText;
-            pngBtn.style.opacity = '1';
-        }
+        pngBtn.disabled = false;
+        pngBtn.innerHTML = originalText;
         hideLoadingOverlay();
     }
 }
 
-// Срздание сертификатов
+// Генерация сертификатов
 document.getElementById('generateBtn').addEventListener('click', () => {
     const mka5Names = document.getElementById('listMka5').value.split(/\r?\n/).filter(n => n.trim());
+    const mka3Names = document.getElementById('listMka3').value.split(/\r?\n/).filter(n => n.trim());
     const firstNames = document.getElementById('listFirstStep').value.split(/\r?\n/).filter(n => n.trim());
 
-    if (mka5Names.length === 0 && firstNames.length === 0) {
-        return alert('Введите хотя бы одно имя');
+    if (mka5Names.length === 0 && firstNames.length === 0 && mka3Names.length === 0) {
+        alert('Введите хотя бы одно имя');
+        return;
     }
 
     certificates = [];
     nextId = 1;
 
     mka5Names.forEach(name => certificates.push({id: nextId++, name: name.trim(), type: 'mka5'}));
+    mka3Names.forEach(name => certificates.push({id: nextId++, name: name.trim(), type: 'mka3'}));
     firstNames.forEach(name => certificates.push({id: nextId++, name: name.trim(), type: 'firststep'}));
 
     let html = '';
@@ -578,25 +763,10 @@ document.getElementById('generateBtn').addEventListener('click', () => {
     });
 });
 
-// Кнопки скачивания
-const actionDiv = document.querySelector('.action-bar > div:first-child');
-if (actionDiv) {
-    const pdfBtn = document.createElement('button');
-    pdfBtn.className = 'btn btn-outline';
-    pdfBtn.innerHTML = '📥 Скачать PDF';
-    pdfBtn.onclick = downloadAsPDF;
-    actionDiv.appendChild(pdfBtn);
-
-    const pngBtn = document.createElement('button');
-    pngBtn.className = 'btn btn-outline';
-    pngBtn.innerHTML = '📥 PNG (ZIP)';
-    pngBtn.onclick = downloadAsPNG;
-    actionDiv.appendChild(pngBtn);
-}
-
 // Пример и очистка
 document.getElementById('sampleBtn').addEventListener('click', () => {
     document.getElementById('listMka5').value = "Екатерина Атомонова\nАлександр Ветров\nПолина Григорьева";
+    document.getElementById('listMka3').value = "Алексей Викторов\nАлександра Кислая\nЗефир Мармеладов";
     document.getElementById('listFirstStep').value = "Максим Дубровин\nСофия Крамер";
 });
 
@@ -607,6 +777,10 @@ document.getElementById('clearAllBtn').addEventListener('click', () => {
         counterSpan.textContent = `Сертификатов: 0`;
     }
 });
+
+// Назначение обработчиков
+document.getElementById('pdfDownloadBtn').addEventListener('click', downloadAsPDF);
+document.getElementById('pngDownloadBtn').addEventListener('click', downloadAsPNG);
 </script>
 </body>
 </html>
