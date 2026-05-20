@@ -1,0 +1,294 @@
+@import url('https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;500;600;700&family=Roboto:wght@400;700&family=Caveat:wght@400;500;600;700&display=swap');
+
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    background: #e2e8f0;
+    font-family: 'Montserrat', 'Segoe UI', system-ui, sans-serif;
+    padding: 30px 20px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    min-height: 100vh;
+}
+
+.admin-panel {
+    max-width: 900px;
+    width: 100%;
+    background: white;
+    border-radius: 28px;
+    box-shadow: 0 12px 30px rgba(0, 0, 0, 0.1);
+    padding: 28px 32px;
+    margin-bottom: 40px;
+}
+
+.admin-title {
+    font-family: 'Roboto', sans-serif;
+    font-weight: 700;
+    font-size: 1.6rem;
+    color: #1a2a4f;
+    margin-bottom: 20px;
+    border-left: 5px solid #f5b042;
+    padding-left: 20px;
+}
+
+.double-lists {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 24px;
+    margin-bottom: 24px;
+}
+
+.list-card {
+    flex: 1;
+    min-width: 240px;
+    background: #f8fafc;
+    border-radius: 20px;
+    padding: 18px;
+    border: 1px solid #e2e8f0;
+}
+
+.list-card h3 {
+    font-family: 'Roboto', sans-serif;
+    font-weight: 700;
+    font-size: 1.2rem;
+    margin-bottom: 12px;
+}
+
+textarea {
+    width: 100%;
+    padding: 12px 14px;
+    font-family: 'Montserrat', monospace;
+    font-size: 0.9rem;
+    border: 1.5px solid #cbd5e1;
+    border-radius: 16px;
+    resize: vertical;
+    min-height: 130px;
+    outline: none;
+    background: white;
+}
+
+textarea:focus {
+    border-color: #8b5cf6;
+}
+
+.action-bar {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: space-between;
+    align-items: center;
+    gap: 12px;
+    margin-top: 8px;
+}
+
+.btn {
+    border: none;
+    padding: 10px 22px;
+    border-radius: 40px;
+    font-family: 'Montserrat', sans-serif;
+    font-weight: 600;
+    font-size: 0.9rem;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.btn-primary {
+    background: linear-gradient(135deg, #071261, #8309E3);
+    color: white;
+}
+
+.btn-outline {
+    background: white;
+    border: 1px solid #cbd5e1;
+}
+
+.btn:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+}
+
+.counter {
+    font-family: 'Montserrat', sans-serif;
+    background: #e9eef3;
+    padding: 5px 14px;
+    border-radius: 40px;
+    font-size: 0.85rem;
+    font-weight: 600;
+}
+
+.certificates-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 30px;
+    width: 100%;
+}
+
+.cert-page {
+    width: 210mm;
+    min-width: 210mm;
+    max-width: 210mm;
+    height: 297mm;
+    min-height: 297mm;
+    margin: 0 auto 30px auto;
+    background: transparent;
+    box-shadow: 0 20px 35px -12px rgba(0, 0, 0, 0.2);
+    border-radius: 4px;
+    overflow: hidden;
+    break-inside: avoid;
+}
+
+.cert-mka5 {
+    background: url('cert_mka5_bg.png') no-repeat center center;
+    background-size: cover;
+    color: white;
+}
+
+.cert-mka3 {
+    background: url('cert_mka3_bg.png') no-repeat center center;
+    background-size: cover;
+    color: white;
+}
+
+.cert-firststep {
+    background: url('cert_firststep_bg.png') no-repeat center center;
+    background-size: cover;
+    color: black;
+}
+
+.certificate {
+    width: 100%;
+    height: 100%;
+    min-height: 297mm;
+    padding: 70px 50px;
+    text-align: center;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    box-sizing: border-box;
+    position: relative;
+}
+
+.cert-logo {
+    margin-bottom: 25px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    width: 100%;
+}
+
+.cert-logo svg {
+    width: 160px;
+    height: auto;
+    display: block;
+}
+
+.cert-content {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    width: 100%;
+}
+
+
+.cert-title {
+    font-family: 'Roboto', sans-serif;
+    font-weight: 700;
+    font-size: 3.8rem;
+    letter-spacing: 3px;
+    margin: 20px 0 15px 0;
+    text-transform: uppercase;
+}
+
+.awarded-text {
+    font-family: 'Montserrat', sans-serif;
+    font-size: 1.3rem;
+    font-weight: 300;
+    letter-spacing: 1px;
+    margin: 10px 0 5px 0;
+}
+
+.recipient-name {
+    font-family: 'Caveat', cursive;
+    font-weight: 400;
+    font-size: 3.2rem;
+    margin: 5px 0 0 0;
+    line-height: 1.2;
+    word-break: break-word;
+}
+
+.name-underline {
+    width: 85%;
+    max-width: 500px;
+    min-width: 240px;
+    height: 2px;
+    margin: 0 auto 20px auto;
+    background: currentColor;
+}
+
+.program-description {
+    font-family: 'Montserrat', sans-serif;
+    font-size: 1.2rem;
+    font-weight: 400;
+    line-height: 1.5;
+    margin: 15px 0 10px 0;
+}
+
+.year-stamp {
+    font-family: 'Montserrat', sans-serif;
+    font-size: 1.2rem;
+    letter-spacing: 2px;
+    font-weight: 400;
+    margin-top: 20px;
+}
+
+.delete-btn-wrapper {
+    text-align: center;
+    margin: 12px 0 20px 0;
+}
+
+.delete-cert-btn {
+    background: rgba(0,0,0,0.7);
+    border: none;
+    border-radius: 40px;
+    padding: 6px 20px;
+    font-family: 'Montserrat', sans-serif;
+    font-size: 0.75rem;
+    cursor: pointer;
+    color: white;
+    transition: background 0.2s;
+}
+
+.delete-cert-btn:hover {
+    background: #b91c1c;
+}
+
+.empty-message {
+    text-align: center;
+    padding: 60px 20px;
+    background: #f8fafc;
+    border-radius: 32px;
+    font-family: 'Montserrat', sans-serif;
+    color: #334155;
+    max-width: 800px;
+    margin: 40px auto;
+}
+
+@media print {
+    body { background: white; padding: 0; margin: 0; }
+    .admin-panel, .delete-btn-wrapper, .action-bar { display: none !important; }
+    .cert-page { box-shadow: none; margin: 0; }
+}
+
+@media (max-width: 700px) {
+    .cert-page { width: 100%; min-width: auto; }
+    .certificate { padding: 30px 20px; }
+    .cert-title { font-size: 2.4rem; }
+    .recipient-name { font-size: 2.1rem; }
+}
