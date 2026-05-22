@@ -77,7 +77,7 @@ function generateCertHTML(name, type) {
                     <div class="awarded-text">вручается</div>
                     <div class="recipient-name">${safeName}</div>
                     <div class="name-underline"></div>
-                    <div class="program-description">об успешном завершении учебного года<br>в программе «МКА5»<br>Малой Компьютерной Академии ТОП</div>
+                    <div class="program-description">за успешное завершение учебного года<br>в программе «МКА5»<br>Малой Компьютерной Академии ТОП</div>
                 </div>
                 <div class="year-stamp">${year}</div>
             </div>`;
@@ -91,7 +91,7 @@ function generateCertHTML(name, type) {
                     <div class="awarded-text">вручается</div>
                     <div class="recipient-name">${safeName}</div>
                     <div class="name-underline"></div>
-                    <div class="program-description">об успешном завершении учебного года<br>в программе «МКА3»<br>Малой Компьютерной Академии ТОП</div>
+                    <div class="program-description">за успешное завершение учебного года <br>в программе «МКА3»<br>Малой Компьютерной Академии ТОП</div>
                 </div>
                 <div class="year-stamp">${year}</div>
             </div>`;
@@ -105,7 +105,7 @@ function generateCertHTML(name, type) {
                     <div class="awarded-text" style="color: #1e1a2f;">вручается</div>
                     <div class="recipient-name" style="color: #1e1a2f;">${safeName}</div>
                     <div class="name-underline"></div>
-                    <div class="program-description" style="color: #1e1a2f;">об успешном завершении учебного года<br>в программе «Первый Шаг»<br>Малой Компьютерной Академии ТОП</div>
+                    <div class="program-description" style="color: #1e1a2f;">за успешное завершение учебного года <br>в программе «Первый Шаг»<br>Малой Компьютерной Академии ТОП</div>
                 </div>
                 <div class="year-stamp" style="color: #1e1a2f;">${year}</div>
             </div>`;
