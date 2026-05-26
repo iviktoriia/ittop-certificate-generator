@@ -157,89 +157,161 @@ function hideLoadingOverlay() {
     }
 }
 
-// Функция для создания временного контейнера для рендера сертификата в исходном размере
-async function renderCertificateToCanvas(certElement) {
-    // Фиксируем точные размеры A4
-    const originalStyles = {
-        height: certElement.style.height,
-        minHeight: certElement.style.minHeight,
-        width: certElement.style.width
-    };
+// Функция обрезки прозрачных краёв canvas (более точная)
+function trimCanvasTransparent(canvas) {
+    const ctx = canvas.getContext('2d');
+    const width = canvas.width;
+    const height = canvas.height;
+    const imageData = ctx.getImageData(0, 0, width, height);
+    const data = imageData.data;
+    
+    let top = height, bottom = 0, left = width, right = 0;
+    let hasContent = false;
+    
+    // Находим реальные границы контента (по наличию непрозрачных пикселей)
+    for (let y = 0; y < height; y++) {
+        for (let x = 0; x < width; x++) {
+            const alpha = data[(y * width + x) * 4 + 3];
+            // Проверяем также цвет, чтобы отсечь белые пиксели
+            const r = data[(y * width + x) * 4];
+            const g = data[(y * width + x) * 4 + 1];
+            const b = data[(y * width + x) * 4 + 2];
+            const isWhite = r > 250 && g > 250 && b > 250;
+            
+            // Считаем пиксель значимым, если он не полностью прозрачный и не белый
+            if (alpha > 50 && !isWhite) {
+                hasContent = true;
+                if (y < top) top = y;
+                if (y > bottom) bottom = y;
+                if (x < left) left = x;
+                if (x > right) right = x;
+            }
+        }
+    }
+    
+    // Если не нашли контент, возвращаем исходный canvas
+    if (!hasContent) {
+        return canvas;
+    }
+    
+    // Добавляем небольшой отступ (2-3 пикселя), чтобы не обрезать края контента
+    top = Math.max(0, top - 2);
+    left = Math.max(0, left - 2);
+    bottom = Math.min(height, bottom + 3);
+    right = Math.min(width, right + 3);
+    
+    const trimmedWidth = right - left;
+    const trimmedHeight = bottom - top;
+    
+    const trimmedCanvas = document.createElement('canvas');
+    trimmedCanvas.width = trimmedWidth;
+    trimmedCanvas.height = trimmedHeight;
+    const trimmedCtx = trimmedCanvas.getContext('2d');
+    
+    trimmedCtx.drawImage(canvas, left, top, trimmedWidth, trimmedHeight, 0, 0, trimmedWidth, trimmedHeight);
+    
+    return trimmedCanvas;
+}
 
-    certElement.style.height = '297mm';
-    certElement.style.minHeight = '297mm';
-    certElement.style.width = '210mm';
-
-    await new Promise(r => setTimeout(r, 50));
-
+// Функция создания временного iframe для рендера сертификата в точном размере A4
+async function renderCertificateToCanvasFixed(certData) {
+    // Создаём временный iframe
+    const iframe = document.createElement('iframe');
+    iframe.style.position = 'fixed';
+    iframe.style.top = '-9999px';
+    iframe.style.left = '-9999px';
+    iframe.style.width = '210mm';
+    iframe.style.height = '297mm';
+    iframe.style.border = 'none';
+    document.body.appendChild(iframe);
+    
+    // Получаем документ внутри iframe
+    const iframeDoc = iframe.contentDocument || iframe.contentWindow.document;
+    
+    // Добавляем базовые стили для iframe (фиксированные размеры A4)
+    const fixedStyles = iframeDoc.createElement('style');
+    fixedStyles.textContent = `
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            width: 210mm;
+            height: 297mm;
+            margin: 0;
+            padding: 0;
+            background: transparent;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .certificate {
+            width: 210mm;
+            height: 297mm;
+            padding: 70px 50px;
+            text-align: center;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            box-sizing: border-box;
+            background-size: cover !important;
+            background-position: center center !important;
+            background-repeat: no-repeat !important;
+            border: none;
+            outline: none;
+            box-shadow: none;
+        }
+        .cert-mka5 { background: url('cert_mka5_bg.png') no-repeat center center; background-size: cover; color: white; }
+        .cert-mka3 { background: url('cert_mka3_bg.png') no-repeat center center; background-size: cover; color: white; }
+        .cert-firststep { background: url('cert_firststep_bg.png') no-repeat center center; background-size: cover; color: black; }
+        .cert-logo { margin-bottom: 25px; display: flex; justify-content: center; align-items: center; }
+        .cert-logo svg { width: 160px; height: auto; display: block; }
+        .cert-content { flex: 1; display: flex; flex-direction: column; justify-content: center; align-items: center; width: 100%; }
+        .cert-title { font-family: 'Roboto', sans-serif; font-weight: 700; font-size: 3.8rem; letter-spacing: 3px; margin: 20px 0 15px 0; text-transform: uppercase; }
+        .awarded-text { font-family: 'Montserrat', sans-serif; font-size: 1.3rem; font-weight: 300; letter-spacing: 1px; margin: 10px 0 5px 0; }
+        .recipient-name { font-family: 'Caveat', cursive; font-weight: 400; font-size: 3.2rem; margin: 5px 0 0 0; line-height: 1.2; word-break: break-word; max-width: 100%; }
+        .name-underline { width: 85%; max-width: 500px; min-width: 240px; height: 2px; margin: 0 auto 20px auto; background: currentColor; }
+        .program-description { font-family: 'Montserrat', sans-serif; font-size: 1.2rem; font-weight: 400; line-height: 1.5; margin: 15px 0 10px 0; }
+        .year-stamp { font-family: 'Montserrat', sans-serif; font-size: 1.2rem; letter-spacing: 2px; font-weight: 400; margin-top: 20px; }
+    `;
+    iframeDoc.head.appendChild(fixedStyles);
+    
+    // Добавляем шрифты Google
+    const fontLink = iframeDoc.createElement('link');
+    fontLink.rel = 'stylesheet';
+    fontLink.href = 'https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;500;600;700&family=Roboto:wght@400;700&family=Caveat:wght@400;500;600;700&display=swap';
+    iframeDoc.head.appendChild(fontLink);
+    
+    // Ждём загрузки шрифтов
+    await new Promise(r => setTimeout(r, 100));
+    
+    // Создаём HTML сертификата в iframe
+    const certHtml = generateCertHTML(certData.name, certData.type);
+    iframeDoc.body.innerHTML = certHtml;
+    
+    // Ждём рендера
+    await new Promise(r => setTimeout(r, 200));
+    
+    // Получаем элемент сертификата внутри iframe
+    const certElement = iframeDoc.querySelector('.certificate');
+    
+    // Принудительно убираем любые возможные рамки
+    certElement.style.border = 'none';
+    certElement.style.outline = 'none';
+    certElement.style.boxShadow = 'none';
+    
+    // Рендерим в canvas
     const canvas = await html2canvas(certElement, {
-        scale: 4,
+        scale: 3,
         useCORS: true,
         backgroundColor: null,
         logging: false,
-        allowTaint: true
+        allowTaint: false,
+        imageTimeout: 0
     });
-
-    // Восстанавливаем оригинальные стили
-    Object.assign(certElement.style, originalStyles);
-
-    // Обрезка рамки
-    const ctx = canvas.getContext('2d');
-    const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
-    const data = imageData.data;
-
-    let top = 0, bottom = canvas.height, left = 0, right = canvas.width;
-
-    // Находим реальные границы контента
-    outer1: for (let y = 0; y < canvas.height; y++) {
-        for (let x = 0; x < canvas.width; x++) {
-            const idx = (y * canvas.width + x) * 4;
-            if (data[idx + 3] > 50) {   // порог альфа-канала
-                top = y;
-                break outer1;
-            }
-        }
-    }
-
-    outer2: for (let y = canvas.height - 1; y >= top; y--) {
-        for (let x = 0; x < canvas.width; x++) {
-            const idx = (y * canvas.width + x) * 4;
-            if (data[idx + 3] > 50) {
-                bottom = y + 1;
-                break outer2;
-            }
-        }
-    }
-
-    outer3: for (let x = 0; x < canvas.width; x++) {
-        for (let y = top; y < bottom; y++) {
-            const idx = (y * canvas.width + x) * 4;
-            if (data[idx + 3] > 50) {
-                left = x;
-                break outer3;
-            }
-        }
-    }
-
-    outer4: for (let x = canvas.width - 1; x >= left; x--) {
-        for (let y = top; y < bottom; y++) {
-            const idx = (y * canvas.width + x) * 4;
-            if (data[idx + 3] > 50) {
-                right = x + 1;
-                break outer4;
-            }
-        }
-    }
-
-    // Создаём обрезанный canvas
-    const trimmedCanvas = document.createElement('canvas');
-    trimmedCanvas.width = right - left;
-    trimmedCanvas.height = bottom - top;
-    const trimmedCtx = trimmedCanvas.getContext('2d');
-    trimmedCtx.drawImage(canvas, left, top, trimmedCanvas.width, trimmedCanvas.height, 
-                        0, 0, trimmedCanvas.width, trimmedCanvas.height);
-
-    return trimmedCanvas;
+    
+    // Удаляем iframe
+    document.body.removeChild(iframe);
+    
+    // Обрезаем прозрачные края
+    return trimCanvasTransparent(canvas);
 }
 
 // PDF генерация
@@ -266,98 +338,24 @@ async function downloadAsPDF() {
             compress: true
         });
 
-        const certElements = document.querySelectorAll('.certificate');
-        const total = certElements.length;
+        const total = certificates.length;
 
         for (let i = 0; i < total; i++) {
             updateProgressDetail(`Обработка ${i+1} из ${total}...`);
 
             if (i > 0) pdf.addPage();
 
-            const cert = certElements[i];
-
-            // Фиксируем точные размеры A4
-            const originalStyles = {
-                height: cert.style.height,
-                minHeight: cert.style.minHeight,
-                width: cert.style.width
-            };
-
-            cert.style.height = '297mm';
-            cert.style.minHeight = '297mm';
-            cert.style.width = '210mm';
-
-            await new Promise(r => setTimeout(r, 50));
-
-            const canvas = await html2canvas(cert, {
-                scale: 4,
-                useCORS: true,
-                backgroundColor: null,
-                logging: false,
-                allowTaint: true,
-                imageTimeout: 0,
-                removeContainer: true
-            });
-
-            // Восстанавливаем стили
-            Object.assign(cert.style, originalStyles);
-
-            // Удаление рамки
-            const ctx = canvas.getContext('2d');
-            const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
-            const data = imageData.data;
-
-            let top = 0, bottom = canvas.height, left = 0, right = canvas.width;
-
-            // Находим реальные границы контента (обрезаем белые поля)
-            outer1: for (let y = 0; y < canvas.height; y++) {
-                for (let x = 0; x < canvas.width; x++) {
-                    const idx = (y * canvas.width + x) * 4;
-                    if (data[idx + 3] > 0) { // если есть альфа или цвет
-                        top = y;
-                        break outer1;
-                    }
-                }
-            }
-            outer2: for (let y = canvas.height - 1; y >= 0; y--) {
-                for (let x = 0; x < canvas.width; x++) {
-                    const idx = (y * canvas.width + x) * 4;
-                    if (data[idx + 3] > 0) {
-                        bottom = y + 1;
-                        break outer2;
-                    }
-                }
-            }
-            outer3: for (let x = 0; x < canvas.width; x++) {
-                for (let y = 0; y < canvas.height; y++) {
-                    const idx = (y * canvas.width + x) * 4;
-                    if (data[idx + 3] > 0) {
-                        left = x;
-                        break outer3;
-                    }
-                }
-            }
-            outer4: for (let x = canvas.width - 1; x >= 0; x--) {
-                for (let y = 0; y < canvas.height; y++) {
-                    const idx = (y * canvas.width + x) * 4;
-                    if (data[idx + 3] > 0) {
-                        right = x + 1;
-                        break outer4;
-                    }
-                }
-            }
-
-            // Создаём новый canvas без белых полей
-            const trimmedCanvas = document.createElement('canvas');
-            trimmedCanvas.width = right - left;
-            trimmedCanvas.height = bottom - top;
-            const trimmedCtx = trimmedCanvas.getContext('2d');
-            trimmedCtx.drawImage(canvas, left, top, trimmedCanvas.width, trimmedCanvas.height, 
-                                0, 0, trimmedCanvas.width, trimmedCanvas.height);
-
-            const imgData = trimmedCanvas.toDataURL('image/png', 1.0);
-
-            pdf.addImage(imgData, 'PNG', 0, 0, 210, 297);
+            const canvas = await renderCertificateToCanvasFixed(certificates[i]);
+            
+            // Получаем соотношение сторон canvas
+            const imgWidth = 210;
+            const imgHeight = (canvas.height * imgWidth) / canvas.width;
+            
+            // Центрируем изображение на странице
+            const yOffset = (297 - imgHeight) / 2;
+            
+            const imgData = canvas.toDataURL('image/png', 1.0);
+            pdf.addImage(imgData, 'PNG', 0, yOffset > 0 ? yOffset : 0, imgWidth, imgHeight);
         }
 
         pdf.save(`Сертификаты_${new Date().toISOString().slice(0,10)}.pdf`);
@@ -371,7 +369,6 @@ async function downloadAsPDF() {
         hideLoadingOverlay();
     }
 }
-
 
 // PNG ZIP генерация
 async function downloadAsPNG() {
@@ -389,13 +386,12 @@ async function downloadAsPNG() {
     
     try {
         const zip = new JSZip();
-        const certs = document.querySelectorAll('.certificate');
-        const total = certs.length;
+        const total = certificates.length;
         
         for (let i = 0; i < total; i++) {
             updateProgressDetail(`Обработка ${i+1} из ${total}...`);
             
-            const canvas = await renderCertificateToCanvas(certs[i]);
+            const canvas = await renderCertificateToCanvasFixed(certificates[i]);
             
             const dataUrl = canvas.toDataURL('image/png').split(',')[1];
             const name = certificates[i].name.replace(/[^а-яА-Яa-zA-Z0-9]/g, '_');
@@ -409,6 +405,7 @@ async function downloadAsPNG() {
         link.href = URL.createObjectURL(blob);
         link.download = `Сертификаты_PNG_${new Date().toISOString().slice(0,10)}.zip`;
         link.click();
+        URL.revokeObjectURL(link.href);
         
     } catch (err) {
         console.error(err);
