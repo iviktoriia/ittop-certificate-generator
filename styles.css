@@ -1,4 +1,4 @@
-@import url('https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;500;600;700&family=Roboto:wght@400;700&family=Caveat:wght@400;500;600;700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;500;600;700&family=Roboto:wght@400;700&family=Caveat:wght@400;500;600;700&family=Nunito:wght@300;400;500;600;700;800&family=Playfair+Display:wght@400;500;600;700&display=swap');
 
 * {
     margin: 0;
@@ -182,8 +182,131 @@ textarea:focus {
     color: black;
 }
 
+/* Стили для благодарственного письма */
+.cert-thankyou {
+    background: url('cert_thankyou_bg.png') no-repeat center center;
+    background-size: cover;
+    color: #1e1a2f;
+    font-family: 'Nunito', sans-serif;
+    padding: 50px 60px;
+    position: relative;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.thankyou-content {
+    width: 100%;
+    max-width: 100%;
+    display: flex;
+    flex-direction: column;
+    text-align: left;
+    position: relative;
+}
+
+.thankyou-title {
+    font-family: 'Playfair Display', serif;
+    font-size: 52px;
+    font-weight: 300;
+    color: #1e1a2f;
+    margin-bottom: 20px;
+    line-height: 1;
+}
+
+.thankyou-parents {
+    font-size: 32px;
+    font-weight: 300;
+    letter-spacing: 2px;
+    margin-bottom: 15px;
+    color: #1e1a2f;
+}
+
+.thankyou-start {
+    font-size: 24px;
+    font-weight: 600;
+    margin-bottom: 15px;
+    color: #1e1a2f;
+}
+
+.thankyou-child-name {
+    font-family: 'Caveat', cursive;
+    font-size: 52px;
+    font-weight: 600;
+    margin: 0px 0 10px 0;
+    color: #A71132;
+    display: inline-block;
+    padding-bottom: 10px;
+    line-height: 1;
+}
+
+.thankyou-text {
+    font-size: 18px;
+    line-height: 1.4;
+    margin-bottom: 15px;
+    color: #1e1a2f;
+}
+
+/* Две колонки внизу */
+.thankyou-two-columns {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    gap: 40px;
+}
+
+.thankyou-left {
+    flex: 1;
+    text-align: left;
+}
+
+.thankyou-signature {
+    font-size: 18px;
+    line-height: 1.4;
+    color: #1e1a2f;
+}
+
+.thankyou-right {
+    flex-shrink: 0;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+}
+
+.thankyou-logo {
+    display: flex;
+    justify-content: center;
+    margin-bottom: 20px;
+}
+
+.thankyou-logo svg {
+    width: 160px;
+    height: auto;
+}
+
+.thankyou-director-line {
+    width: 120%;
+    height: 1px;
+    background: #1e1a2f;
+    margin: 10px 0;
+}
+
+.thankyou-director {
+    font-family: 'Playfair Display', serif;
+    font-size: 24px;
+    font-weight: 300;
+    text-align: center;
+    color: #1e1a2f;
+}
+
+.director-title {
+    font-size: 18px;
+    font-weight: 400;
+    font-family: 'Nunito', sans-serif;
+}
+
 .cert-logo {
-    margin-bottom: 25px;
+    margin-bottom: 15px;
     display: flex;
     justify-content: center;
     align-items: center;
@@ -384,5 +507,14 @@ textarea:focus {
     }
     .cert-logo svg {
         width: 100px;
+    }
+    .thankyou-title {
+        font-size: 24px;
+    }
+    .thankyou-child-name {
+        font-size: 32px;
+    }
+    .thankyou-text {
+        font-size: 13px;
     }
 }

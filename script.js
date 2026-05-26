@@ -60,6 +60,7 @@ let nextId = 1;
 const container = document.getElementById('certificatesContainer');
 const counterSpan = document.getElementById('counterDisplay');
 
+// ГЕНЕРАЦИЯ HTML
 function escapeHtml(str) {
     return str.replace(/[&<>]/g, m => m === '&' ? '&amp;' : m === '<' ? '&lt;' : '&gt;');
 }
@@ -77,12 +78,11 @@ function generateCertHTML(name, type) {
                     <div class="awarded-text">вручается</div>
                     <div class="recipient-name">${safeName}</div>
                     <div class="name-underline"></div>
-                    <div class="program-description">за успешное завершение учебного года<br>в программе «МКА5»<br>Малой Компьютерной Академии ТОП</div>
+                    <div class="program-description">об успешном завершении учебного года<br>в программе «МКА5»<br>Малой Компьютерной Академии ТОП</div>
                 </div>
                 <div class="year-stamp">${year}</div>
             </div>`;
-    } 
-    else if (type === 'mka3') {
+    } else if (type === 'mka3') {
         return `
             <div class="certificate cert-mka3">
                 <div class="cert-logo">${WHITE_LOGO_SVG}</div>
@@ -91,12 +91,49 @@ function generateCertHTML(name, type) {
                     <div class="awarded-text">вручается</div>
                     <div class="recipient-name">${safeName}</div>
                     <div class="name-underline"></div>
-                    <div class="program-description">за успешное завершение учебного года <br>в программе «МКА3»<br>Малой Компьютерной Академии ТОП</div>
+                    <div class="program-description">об успешном завершении учебного года<br>в программе «МКА3»<br>Малой Компьютерной Академии ТОП</div>
                 </div>
                 <div class="year-stamp">${year}</div>
             </div>`;
-    }
-    else {
+    } else if (type === 'thankyou') {
+        return `
+            <div class="certificate cert-thankyou">
+                <div class="thankyou-content">
+                    <div class="thankyou-title">БЛАГОДАРСТВЕННОЕ ПИСЬМО</div>
+                    <div class="thankyou-parents">УВАЖАЕМЫЕ РОДИТЕЛИ!</div>
+                    <div class="thankyou-start">
+                        Педагогический коллектив Компьютерной Академии ТОП благодарит Вас за воспитание Вашего ребенка
+                    </div>
+                    <div class="thankyou-child-name">${safeName}</div>
+                    <div class="thankyou-text">
+                        За этот учебный год он успешно освоил необходимый IT-материал, научился работать в команде, уверенно решать практические задачи и достойно преодолевать возникающие трудности. Ребёнок проявил интерес к современным технологиям и показал хорошие результаты в обучении.
+                    </div>
+                    <div class="thankyou-text">
+                        Каждый успех Вашего ребёнка — это общий результат наших совместных усилий и, прежде всего, Вашей поддержки, терпения и внимания. Мы высоко ценим Ваше доверие, открытость и готовность к конструктивному диалогу.
+                    </div>
+                    <div class="thankyou-text">
+                         Желаем Вашему ребёнку новых побед, интересных и амбициозных проектов, а также уверенного и вдохновенного пути в мир IT-профессий. Пусть следующий этап обучения принесёт ещё больше радости от достижений и гордости за свои результаты.
+                    </div>     
+                    <div class="thankyou-two-columns">
+                        <div class="thankyou-left">
+                            <div class="thankyou-signature">
+                                С уважением и признательностью,<br>
+                                Администрация и педагогический состав<br>
+                                Компьютерной Академии ТОП
+                            </div>
+                        </div>
+                        <div class="thankyou-right">
+                            <div class="thankyou-logo">${BLACK_LOGO_SVG}</div>
+                            <div class="thankyou-director-line"></div>
+                            <div class="thankyou-director">
+                                Горбунова Наталья<br>
+                                <span class="director-title">Директор</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>`;
+    } else {
         return `
             <div class="certificate cert-firststep">
                 <div class="cert-logo">${BLACK_LOGO_SVG}</div>
@@ -105,42 +142,33 @@ function generateCertHTML(name, type) {
                     <div class="awarded-text" style="color: #1e1a2f;">вручается</div>
                     <div class="recipient-name" style="color: #1e1a2f;">${safeName}</div>
                     <div class="name-underline"></div>
-                    <div class="program-description" style="color: #1e1a2f;">за успешное завершение учебного года <br>в программе «Первый Шаг»<br>Малой Компьютерной Академии ТОП</div>
+                    <div class="program-description" style="color: #1e1a2f;">об успешном завершении учебного года<br>в программе «Первый Шаг»<br>Малой Компьютерной Академии ТОП</div>
                 </div>
                 <div class="year-stamp" style="color: #1e1a2f;">${year}</div>
             </div>`;
     }
 }
 
+// ОВЕРЛЕЙ
 function showLoadingOverlay(message = "Обработка...") {
     let overlay = document.getElementById('loadingOverlay');
-    
     if (!overlay) {
         overlay = document.createElement('div');
         overlay.id = 'loadingOverlay';
         overlay.style.cssText = `
-            position: fixed;
-            top: 0; left: 0;
-            width: 100%; height: 100%;
-            background: rgba(0, 0, 0, 0.85);
-            display: none;
-            align-items: center;
-            justify-content: center;
-            z-index: 9999;
-            font-family: 'Montserrat', sans-serif;
-            color: white;
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0,0,0,0.85); display: none; align-items: center;
+            justify-content: center; z-index: 9999; font-family: 'Montserrat', sans-serif; color: white;
         `;
-        
         overlay.innerHTML = `
-            <div style="text-align: center;">
+            <div style="text-align:center;">
                 <div class="spinner"></div>
-                <div id="loadingMessage" style="font-size: 1.25rem; margin: 15px 0;">${message}</div>
+                <div id="loadingMessage" style="font-size:1.25rem;margin:15px 0;">${message}</div>
                 <div id="progressDetail" class="progress-text"></div>
             </div>
         `;
         document.body.appendChild(overlay);
     }
-    
     document.getElementById('loadingMessage').textContent = message;
     overlay.style.display = 'flex';
 }
@@ -152,70 +180,12 @@ function updateProgressDetail(text) {
 
 function hideLoadingOverlay() {
     const overlay = document.getElementById('loadingOverlay');
-    if (overlay) {
-        overlay.style.display = 'none';
-    }
+    if (overlay) overlay.style.display = 'none';
 }
 
-// Функция обрезки прозрачных краёв canvas (более точная)
-function trimCanvasTransparent(canvas) {
-    const ctx = canvas.getContext('2d');
-    const width = canvas.width;
-    const height = canvas.height;
-    const imageData = ctx.getImageData(0, 0, width, height);
-    const data = imageData.data;
-    
-    let top = height, bottom = 0, left = width, right = 0;
-    let hasContent = false;
-    
-    // Находим реальные границы контента (по наличию непрозрачных пикселей)
-    for (let y = 0; y < height; y++) {
-        for (let x = 0; x < width; x++) {
-            const alpha = data[(y * width + x) * 4 + 3];
-            // Проверяем также цвет, чтобы отсечь белые пиксели
-            const r = data[(y * width + x) * 4];
-            const g = data[(y * width + x) * 4 + 1];
-            const b = data[(y * width + x) * 4 + 2];
-            const isWhite = r > 250 && g > 250 && b > 250;
-            
-            // Считаем пиксель значимым, если он не полностью прозрачный и не белый
-            if (alpha > 50 && !isWhite) {
-                hasContent = true;
-                if (y < top) top = y;
-                if (y > bottom) bottom = y;
-                if (x < left) left = x;
-                if (x > right) right = x;
-            }
-        }
-    }
-    
-    // Если не нашли контент, возвращаем исходный canvas
-    if (!hasContent) {
-        return canvas;
-    }
-    
-    // Добавляем небольшой отступ (2-3 пикселя), чтобы не обрезать края контента
-    top = Math.max(0, top - 2);
-    left = Math.max(0, left - 2);
-    bottom = Math.min(height, bottom + 3);
-    right = Math.min(width, right + 3);
-    
-    const trimmedWidth = right - left;
-    const trimmedHeight = bottom - top;
-    
-    const trimmedCanvas = document.createElement('canvas');
-    trimmedCanvas.width = trimmedWidth;
-    trimmedCanvas.height = trimmedHeight;
-    const trimmedCtx = trimmedCanvas.getContext('2d');
-    
-    trimmedCtx.drawImage(canvas, left, top, trimmedWidth, trimmedHeight, 0, 0, trimmedWidth, trimmedHeight);
-    
-    return trimmedCanvas;
-}
-
-// Функция создания временного iframe для рендера сертификата в точном размере A4
-async function renderCertificateToCanvasFixed(certData) {
-    // Создаём временный iframe
+// РЕНДЕР ЧЕРЕЗ IFrame 
+async function renderCertificateToCanvasFixed(certificateData) {
+    // Создаём iframe
     const iframe = document.createElement('iframe');
     iframe.style.position = 'fixed';
     iframe.style.top = '-9999px';
@@ -225,23 +195,23 @@ async function renderCertificateToCanvasFixed(certData) {
     iframe.style.border = 'none';
     document.body.appendChild(iframe);
     
-    // Получаем документ внутри iframe
     const iframeDoc = iframe.contentDocument || iframe.contentWindow.document;
     
-    // Добавляем базовые стили для iframe (фиксированные размеры A4)
+    // Полные стили для iframe (фиксированные, без медиазапросов)
     const fixedStyles = iframeDoc.createElement('style');
     fixedStyles.textContent = `
+        @import url('https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;500;600;700&family=Roboto:wght@400;700&family=Caveat:wght@400;500;600;700&family=Nunito:wght@300;400;500;600;700;800&family=Playfair+Display:wght@400;500;600;700&display=swap');
+        
         * { margin: 0; padding: 0; box-sizing: border-box; }
+        
         body {
             width: 210mm;
             height: 297mm;
             margin: 0;
             padding: 0;
             background: transparent;
-            display: flex;
-            align-items: center;
-            justify-content: center;
         }
+        
         .certificate {
             width: 210mm;
             height: 297mm;
@@ -256,43 +226,221 @@ async function renderCertificateToCanvasFixed(certData) {
             background-repeat: no-repeat !important;
             border: none;
             outline: none;
-            box-shadow: none;
         }
+        
         .cert-mka5 { background: url('cert_mka5_bg.png') no-repeat center center; background-size: cover; color: white; }
         .cert-mka3 { background: url('cert_mka3_bg.png') no-repeat center center; background-size: cover; color: white; }
         .cert-firststep { background: url('cert_firststep_bg.png') no-repeat center center; background-size: cover; color: black; }
-        .cert-logo { margin-bottom: 25px; display: flex; justify-content: center; align-items: center; }
-        .cert-logo svg { width: 160px; height: auto; display: block; }
-        .cert-content { flex: 1; display: flex; flex-direction: column; justify-content: center; align-items: center; width: 100%; }
-        .cert-title { font-family: 'Roboto', sans-serif; font-weight: 700; font-size: 3.8rem; letter-spacing: 3px; margin: 20px 0 15px 0; text-transform: uppercase; }
-        .awarded-text { font-family: 'Montserrat', sans-serif; font-size: 1.3rem; font-weight: 300; letter-spacing: 1px; margin: 10px 0 5px 0; }
-        .recipient-name { font-family: 'Caveat', cursive; font-weight: 400; font-size: 3.2rem; margin: 5px 0 0 0; line-height: 1.2; word-break: break-word; max-width: 100%; }
-        .name-underline { width: 85%; max-width: 500px; min-width: 240px; height: 2px; margin: 0 auto 20px auto; background: currentColor; }
-        .program-description { font-family: 'Montserrat', sans-serif; font-size: 1.2rem; font-weight: 400; line-height: 1.5; margin: 15px 0 10px 0; }
-        .year-stamp { font-family: 'Montserrat', sans-serif; font-size: 1.2rem; letter-spacing: 2px; font-weight: 400; margin-top: 20px; }
+        
+        .cert-thankyou {
+            background: url('cert_thankyou_bg.png') no-repeat center center;
+            background-size: cover;
+            color: #1e1a2f;
+            font-family: 'Nunito', sans-serif;
+            padding: 50px 60px;
+            position: relative;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .thankyou-content {
+            width: 100%;
+            max-width: 100%;
+            display: flex;
+            flex-direction: column;
+            text-align: left;
+            position: relative;
+        }
+        
+        .thankyou-title {
+            font-family: 'Playfair Display', serif;
+            font-size: 52px;
+            font-weight: 300;
+            color: #1e1a2f;
+            margin-bottom: 20px;
+            line-height: 1;
+        }
+        
+        .thankyou-parents {
+            font-size: 32px;
+            font-weight: 300;
+            letter-spacing: 2px;
+            margin-bottom: 15px;
+            color: #1e1a2f;
+        }
+        
+        .thankyou-start {
+            font-size: 24px;
+            font-weight: 600;
+            margin-bottom: 15px;
+            color: #1e1a2f;
+        }
+        
+        .thankyou-child-name {
+            font-family: 'Caveat', cursive;
+            font-size: 52px;
+            font-weight: 600;
+            margin: 0px 0 10px 0;
+            color: #A71132;
+            display: inline-block;
+            padding-bottom: 10px;
+            line-height: 1;
+        }
+        
+        .thankyou-text {
+            font-size: 18px;
+            line-height: 1.4;
+            margin-bottom: 15px;
+            color: #1e1a2f;
+        }
+        
+        .thankyou-two-columns {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            gap: 40px;
+        }
+        
+        .thankyou-left {
+            flex: 1;
+            text-align: left;
+        }
+        
+        .thankyou-signature {
+            font-size: 18px;
+            line-height: 1.4;
+            color: #1e1a2f;
+        }
+        
+        .thankyou-right {
+            flex-shrink: 0;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            text-align: center;
+        }
+        
+        .thankyou-logo {
+            display: flex;
+            justify-content: center;
+            margin-bottom: 20px;
+        }
+        
+        .thankyou-logo svg {
+            width: 160px;
+            height: auto;
+        }
+        
+        .thankyou-director-line {
+            width: 120%;
+            height: 1px;
+            background: #1e1a2f;
+            margin: 10px 0;
+        }
+        
+        .thankyou-director {
+            font-family: 'Playfair Display', serif;
+            font-size: 24px;
+            font-weight: 300;
+            text-align: center;
+            color: #1e1a2f;
+        }
+        
+        .director-title {
+            font-size: 18px;
+            font-weight: 400;
+            font-family: 'Nunito', sans-serif;
+        }
+        
+        .cert-logo {
+            margin-bottom: 15px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            width: 100%;
+        }
+        
+        .cert-logo svg {
+            width: 160px;
+            height: auto;
+            display: block;
+        }
+        
+        .cert-content {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            width: 100%;
+        }
+        
+        .cert-title {
+            font-family: 'Roboto', sans-serif;
+            font-weight: 700;
+            font-size: 60px;
+            letter-spacing: 3px;
+            margin: 20px 0 15px 0;
+            text-transform: uppercase;
+        }
+        
+        .awarded-text {
+            font-family: 'Montserrat', sans-serif;
+            font-size: 21px;
+            font-weight: 300;
+            letter-spacing: 1px;
+            margin: 10px 0 5px 0;
+        }
+        
+        .recipient-name {
+            font-family: 'Caveat', cursive;
+            font-weight: 400;
+            font-size: 52px;
+            margin: 5px 0 0 0;
+            line-height: 1.2;
+            word-break: break-word;
+            max-width: 100%;
+        }
+        
+        .name-underline {
+            width: 85%;
+            max-width: 500px;
+            min-width: 240px;
+            height: 2px;
+            margin: 0 auto 20px auto;
+            background: currentColor;
+        }
+        
+        .program-description {
+            font-family: 'Montserrat', sans-serif;
+            font-size: 19px;
+            font-weight: 400;
+            line-height: 1.5;
+            margin: 15px 0 10px 0;
+        }
+        
+        .year-stamp {
+            font-family: 'Montserrat', sans-serif;
+            font-size: 19px;
+            letter-spacing: 2px;
+            font-weight: 400;
+            margin-top: 20px;
+        }
     `;
     iframeDoc.head.appendChild(fixedStyles);
     
-    // Добавляем шрифты Google
-    const fontLink = iframeDoc.createElement('link');
-    fontLink.rel = 'stylesheet';
-    fontLink.href = 'https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;500;600;700&family=Roboto:wght@400;700&family=Caveat:wght@400;500;600;700&display=swap';
-    iframeDoc.head.appendChild(fontLink);
-    
-    // Ждём загрузки шрифтов
-    await new Promise(r => setTimeout(r, 100));
-    
-    // Создаём HTML сертификата в iframe
-    const certHtml = generateCertHTML(certData.name, certData.type);
+    // Добавляем HTML сертификата
+    const certHtml = generateCertHTML(certificateData.name, certificateData.type);
     iframeDoc.body.innerHTML = certHtml;
     
     // Ждём рендера
     await new Promise(r => setTimeout(r, 200));
     
-    // Получаем элемент сертификата внутри iframe
+    // Получаем элемент сертификата
     const certElement = iframeDoc.querySelector('.certificate');
     
-    // Принудительно убираем любые возможные рамки
+    // Убираем возможные рамки
     certElement.style.border = 'none';
     certElement.style.outline = 'none';
     certElement.style.boxShadow = 'none';
@@ -310,58 +458,36 @@ async function renderCertificateToCanvasFixed(certData) {
     // Удаляем iframe
     document.body.removeChild(iframe);
     
-    // Обрезаем прозрачные края
-    return trimCanvasTransparent(canvas);
+    return canvas;
 }
 
-// PDF генерация
+// PDF
 async function downloadAsPDF() {
-    if (certificates.length === 0) {
-        alert('Нет сертификатов для скачивания');
-        return;
-    }
+    if (certificates.length === 0) return alert('Нет сертификатов');
 
     const pdfBtn = document.getElementById('pdfDownloadBtn');
     const originalText = pdfBtn.innerHTML;
-    
+
     pdfBtn.disabled = true;
     pdfBtn.innerHTML = '⏳ Генерируется...';
-    
     showLoadingOverlay(`Создание PDF (${certificates.length} шт.)...`);
 
     try {
         const { jsPDF } = window.jspdf;
-        const pdf = new jsPDF({
-            orientation: 'portrait',
-            unit: 'mm',
-            format: 'a4',
-            compress: true
-        });
+        const pdf = new jsPDF({ orientation: 'portrait', unit: 'mm', format: 'a4' });
 
-        const total = certificates.length;
-
-        for (let i = 0; i < total; i++) {
-            updateProgressDetail(`Обработка ${i+1} из ${total}...`);
-
+        for (let i = 0; i < certificates.length; i++) {
             if (i > 0) pdf.addPage();
+            updateProgressDetail(`Страница ${i+1} из ${certificates.length}...`);
 
             const canvas = await renderCertificateToCanvasFixed(certificates[i]);
-            
-            // Получаем соотношение сторон canvas
-            const imgWidth = 210;
-            const imgHeight = (canvas.height * imgWidth) / canvas.width;
-            
-            // Центрируем изображение на странице
-            const yOffset = (297 - imgHeight) / 2;
-            
             const imgData = canvas.toDataURL('image/png', 1.0);
-            pdf.addImage(imgData, 'PNG', 0, yOffset > 0 ? yOffset : 0, imgWidth, imgHeight);
+            pdf.addImage(imgData, 'PNG', 0, 0, 210, 297);
         }
 
         pdf.save(`Сертификаты_${new Date().toISOString().slice(0,10)}.pdf`);
-
-    } catch (err) {
-        console.error(err);
+    } catch (e) {
+        console.error(e);
         alert('Ошибка при создании PDF');
     } finally {
         pdfBtn.disabled = false;
@@ -370,45 +496,35 @@ async function downloadAsPDF() {
     }
 }
 
-// PNG ZIP генерация
+// PNG
 async function downloadAsPNG() {
-    if (certificates.length === 0) {
-        alert('Нет сертификатов для скачивания');
-        return;
-    }
+    if (certificates.length === 0) return alert('Нет сертификатов');
 
     const pngBtn = document.getElementById('pngDownloadBtn');
     const originalText = pngBtn.innerHTML;
-    
+
     pngBtn.disabled = true;
     pngBtn.innerHTML = '⏳ Создание ZIP...';
     showLoadingOverlay(`Создание PNG (${certificates.length} файлов)...`);
-    
+
     try {
         const zip = new JSZip();
-        const total = certificates.length;
-        
-        for (let i = 0; i < total; i++) {
-            updateProgressDetail(`Обработка ${i+1} из ${total}...`);
-            
+
+        for (let i = 0; i < certificates.length; i++) {
+            updateProgressDetail(`Файл ${i+1} из ${certificates.length}...`);
             const canvas = await renderCertificateToCanvasFixed(certificates[i]);
-            
             const dataUrl = canvas.toDataURL('image/png').split(',')[1];
             const name = certificates[i].name.replace(/[^а-яА-Яa-zA-Z0-9]/g, '_');
             zip.file(`${name}_сертификат.png`, dataUrl, {base64: true});
         }
-        
-        updateProgressDetail('Создание архива...');
-        const blob = await zip.generateAsync({type: "blob", compression: "DEFLATE"});
-        
+
+        const blob = await zip.generateAsync({type: "blob"});
         const link = document.createElement('a');
         link.href = URL.createObjectURL(blob);
         link.download = `Сертификаты_PNG_${new Date().toISOString().slice(0,10)}.zip`;
         link.click();
-        URL.revokeObjectURL(link.href);
-        
-    } catch (err) {
-        console.error(err);
+    } catch (e) {
+        console.error(e);
         alert('Ошибка при создании PNG');
     } finally {
         pngBtn.disabled = false;
@@ -417,23 +533,13 @@ async function downloadAsPNG() {
     }
 }
 
-// Генерация сертификатов
-document.getElementById('generateBtn').addEventListener('click', () => {
-    const mka5Names = document.getElementById('listMka5').value.split(/\r?\n/).filter(n => n.trim());
-    const mka3Names = document.getElementById('listMka3').value.split(/\r?\n/).filter(n => n.trim());
-    const firstNames = document.getElementById('listFirstStep').value.split(/\r?\n/).filter(n => n.trim());
-
-    if (mka5Names.length === 0 && firstNames.length === 0 && mka3Names.length === 0) {
-        alert('Введите хотя бы одно имя');
+// ОТРИСОВКА НА ЭКРАНЕ
+function renderCertificates() {
+    if (certificates.length === 0) {
+        container.innerHTML = `<div class="empty-message">Заполните списки имён и нажмите «Создать сертификаты»</div>`;
+        counterSpan.textContent = `Сертификатов: 0`;
         return;
     }
-
-    certificates = [];
-    nextId = 1;
-
-    mka5Names.forEach(name => certificates.push({id: nextId++, name: name.trim(), type: 'mka5'}));
-    mka3Names.forEach(name => certificates.push({id: nextId++, name: name.trim(), type: 'mka3'}));
-    firstNames.forEach(name => certificates.push({id: nextId++, name: name.trim(), type: 'firststep'}));
 
     let html = '';
     certificates.forEach(cert => {
@@ -449,31 +555,64 @@ document.getElementById('generateBtn').addEventListener('click', () => {
     container.innerHTML = html;
     counterSpan.textContent = `Сертификатов: ${certificates.length}`;
 
-    document.querySelectorAll('.delete-cert-btn').forEach(btn => {
-        btn.addEventListener('click', () => {
-            const id = parseInt(btn.dataset.id);
-            certificates = certificates.filter(c => c.id !== id);
-            document.querySelector(`.cert-page[data-id="${id}"]`).remove();
-            counterSpan.textContent = `Сертификатов: ${certificates.length}`;
-        });
+    // Делегирование событий для кнопок удаления
+    container.querySelectorAll('.delete-cert-btn').forEach(btn => {
+        btn.removeEventListener('click', handleDelete);
+        btn.addEventListener('click', handleDelete);
     });
+}
+
+function handleDelete(e) {
+    const id = parseInt(e.target.getAttribute('data-id'));
+    if (id) {
+        certificates = certificates.filter(c => c.id !== id);
+        renderCertificates();
+    }
+}
+
+// ОБРАБОТЧИКИ
+document.getElementById('generateBtn').addEventListener('click', () => {
+    const mka5Names = document.getElementById('listMka5').value.split(/\r?\n/).filter(n => n.trim());
+    const mka3Names = document.getElementById('listMka3').value.split(/\r?\n/).filter(n => n.trim());
+    const firstNames = document.getElementById('listFirstStep').value.split(/\r?\n/).filter(n => n.trim());
+    const thankyouNames = document.getElementById('listThankyou') ? 
+        document.getElementById('listThankyou').value.split(/\r?\n/).filter(n => n.trim()) : [];
+
+    if (mka5Names.length === 0 && mka3Names.length === 0 && firstNames.length === 0 && thankyouNames.length === 0) {
+        alert('Введите хотя бы одно имя');
+        return;
+    }
+
+    certificates = [];
+    nextId = 1;
+
+    mka5Names.forEach(name => certificates.push({id: nextId++, name: name.trim(), type: 'mka5'}));
+    mka3Names.forEach(name => certificates.push({id: nextId++, name: name.trim(), type: 'mka3'}));
+    firstNames.forEach(name => certificates.push({id: nextId++, name: name.trim(), type: 'firststep'}));
+    thankyouNames.forEach(name => certificates.push({id: nextId++, name: name.trim(), type: 'thankyou'}));
+
+    renderCertificates();
 });
 
-// Пример и очистка
 document.getElementById('sampleBtn').addEventListener('click', () => {
-    document.getElementById('listMka5').value = "Екатерина Атомонова\nАлександр Ветров\nПолина Григорьева";
-    document.getElementById('listMka3').value = "Алексей Викторов\nАлександра Кислая\nЗефир Мармеладов";
-    document.getElementById('listFirstStep').value = "Максим Дубровин\nСофия Крамер";
-});
-
-document.getElementById('clearAllBtn').addEventListener('click', () => {
-    if (confirm('Удалить все сертификаты?')) {
-        certificates = [];
-        container.innerHTML = `<div class="empty-message">Сертификаты очищены</div>`;
-        counterSpan.textContent = `Сертификатов: 0`;
+    document.getElementById('listMka5').value = "Екатерина Атомонова";
+    document.getElementById('listMka3').value = "Алексей Викторов";
+    document.getElementById('listFirstStep').value = "Максим Дубровин";
+    if (document.getElementById('listThankyou')) {
+        document.getElementById('listThankyou').value = "Анна Коваленко";
     }
 });
 
-// Назначение обработчиков
+document.getElementById('clearAllBtn').addEventListener('click', () => {
+    if (confirm('Удалить все документы?')) {
+        certificates = [];
+        renderCertificates();
+    }
+});
+
+// Назначение кнопок скачивания
 document.getElementById('pdfDownloadBtn').addEventListener('click', downloadAsPDF);
 document.getElementById('pngDownloadBtn').addEventListener('click', downloadAsPNG);
+
+// Инициализация
+renderCertificates();
