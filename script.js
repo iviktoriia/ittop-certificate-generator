@@ -149,6 +149,52 @@ function generateCertHTML(name, type) {
     }
 }
 
+// СОХРАНЕНИЕ ДАННЫХ В localStorage
+function saveInputData() {
+    const mka5Value = document.getElementById('listMka5')?.value || '';
+    const mka3Value = document.getElementById('listMka3')?.value || '';
+    const firstStepValue = document.getElementById('listFirstStep')?.value || '';
+    const thankyouValue = document.getElementById('listThankyou')?.value || '';
+    
+    localStorage.setItem('cert_mka5_data', mka5Value);
+    localStorage.setItem('cert_mka3_data', mka3Value);
+    localStorage.setItem('cert_firststep_data', firstStepValue);
+    localStorage.setItem('cert_thankyou_data', thankyouValue);
+}
+
+function loadInputData() {
+    const savedMka5 = localStorage.getItem('cert_mka5_data');
+    const savedMka3 = localStorage.getItem('cert_mka3_data');
+    const savedFirstStep = localStorage.getItem('cert_firststep_data');
+    const savedThankyou = localStorage.getItem('cert_thankyou_data');
+    
+    if (savedMka5) document.getElementById('listMka5').value = savedMka5;
+    if (savedMka3) document.getElementById('listMka3').value = savedMka3;
+    if (savedFirstStep) document.getElementById('listFirstStep').value = savedFirstStep;
+    if (savedThankyou && document.getElementById('listThankyou')) {
+        document.getElementById('listThankyou').value = savedThankyou;
+    }
+}
+
+function clearSavedData() {
+    localStorage.removeItem('cert_mka5_data');
+    localStorage.removeItem('cert_mka3_data');
+    localStorage.removeItem('cert_firststep_data');
+    localStorage.removeItem('cert_thankyou_data');
+}
+
+function setupAutoSave() {
+    const mka5Textarea = document.getElementById('listMka5');
+    const mka3Textarea = document.getElementById('listMka3');
+    const firstStepTextarea = document.getElementById('listFirstStep');
+    const thankyouTextarea = document.getElementById('listThankyou');
+    
+    if (mka5Textarea) mka5Textarea.addEventListener('input', saveInputData);
+    if (mka3Textarea) mka3Textarea.addEventListener('input', saveInputData);
+    if (firstStepTextarea) firstStepTextarea.addEventListener('input', saveInputData);
+    if (thankyouTextarea) thankyouTextarea.addEventListener('input', saveInputData);
+}
+
 // ОВЕРЛЕЙ
 function showLoadingOverlay(message = "Обработка...") {
     let overlay = document.getElementById('loadingOverlay');
@@ -183,9 +229,8 @@ function hideLoadingOverlay() {
     if (overlay) overlay.style.display = 'none';
 }
 
-// РЕНДЕР ЧЕРЕЗ IFrame 
+// РЕНДЕР ЧЕРЕЗ IFrame
 async function renderCertificateToCanvasFixed(certificateData) {
-    // Создаём iframe
     const iframe = document.createElement('iframe');
     iframe.style.position = 'fixed';
     iframe.style.top = '-9999px';
@@ -197,7 +242,6 @@ async function renderCertificateToCanvasFixed(certificateData) {
     
     const iframeDoc = iframe.contentDocument || iframe.contentWindow.document;
     
-    // Полные стили для iframe (фиксированные, без медиазапросов)
     const fixedStyles = iframeDoc.createElement('style');
     fixedStyles.textContent = `
         @import url('https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;500;600;700&family=Roboto:wght@400;700&family=Caveat:wght@400;500;600;700&family=Nunito:wght@300;400;500;600;700;800&family=Playfair+Display:wght@400;500;600;700&display=swap');
@@ -430,22 +474,16 @@ async function renderCertificateToCanvasFixed(certificateData) {
     `;
     iframeDoc.head.appendChild(fixedStyles);
     
-    // Добавляем HTML сертификата
     const certHtml = generateCertHTML(certificateData.name, certificateData.type);
     iframeDoc.body.innerHTML = certHtml;
     
-    // Ждём рендера
     await new Promise(r => setTimeout(r, 200));
     
-    // Получаем элемент сертификата
     const certElement = iframeDoc.querySelector('.certificate');
-    
-    // Убираем возможные рамки
     certElement.style.border = 'none';
     certElement.style.outline = 'none';
     certElement.style.boxShadow = 'none';
     
-    // Рендерим в canvas
     const canvas = await html2canvas(certElement, {
         scale: 3,
         useCORS: true,
@@ -455,9 +493,7 @@ async function renderCertificateToCanvasFixed(certificateData) {
         imageTimeout: 0
     });
     
-    // Удаляем iframe
     document.body.removeChild(iframe);
-    
     return canvas;
 }
 
@@ -555,7 +591,6 @@ function renderCertificates() {
     container.innerHTML = html;
     counterSpan.textContent = `Сертификатов: ${certificates.length}`;
 
-    // Делегирование событий для кнопок удаления
     container.querySelectorAll('.delete-cert-btn').forEach(btn => {
         btn.removeEventListener('click', handleDelete);
         btn.addEventListener('click', handleDelete);
@@ -592,27 +627,40 @@ document.getElementById('generateBtn').addEventListener('click', () => {
     thankyouNames.forEach(name => certificates.push({id: nextId++, name: name.trim(), type: 'thankyou'}));
 
     renderCertificates();
+    saveInputData();
 });
 
 document.getElementById('sampleBtn').addEventListener('click', () => {
     document.getElementById('listMka5').value = "Екатерина Атомонова";
     document.getElementById('listMka3').value = "Алексей Викторов";
-    document.getElementById('listFirstStep').value = "Максим Дубровин";
+    document.getElementById('listFirstStep').value = "София Крамер";
     if (document.getElementById('listThankyou')) {
-        document.getElementById('listThankyou').value = "Анна Коваленко";
+        document.getElementById('listThankyou').value = "Иван Смирнов";
     }
+    saveInputData();
 });
 
 document.getElementById('clearAllBtn').addEventListener('click', () => {
-    if (confirm('Удалить все документы?')) {
+    if (confirm('Удалить все документы и очистить сохранённые данные?')) {
         certificates = [];
         renderCertificates();
+        document.getElementById('listMka5').value = '';
+        document.getElementById('listMka3').value = '';
+        document.getElementById('listFirstStep').value = '';
+        if (document.getElementById('listThankyou')) {
+            document.getElementById('listThankyou').value = '';
+        }
+        clearSavedData();
     }
 });
 
 // Назначение кнопок скачивания
 document.getElementById('pdfDownloadBtn').addEventListener('click', downloadAsPDF);
 document.getElementById('pngDownloadBtn').addEventListener('click', downloadAsPNG);
+
+// Загружаем сохранённые данные и настраиваем автосохранение
+loadInputData();
+setupAutoSave();
 
 // Инициализация
 renderCertificates();
