@@ -182,6 +182,12 @@ textarea:focus {
     color: black;
 }
 
+.cert-striving {
+    background: url('cert_striving_bg.png') no-repeat center center;
+    background-size: cover;
+    color: black;
+}
+
 /* Стили для благодарственного письма */
 .cert-thankyou {
     background: url('cert_thankyou_bg.png') no-repeat center center;

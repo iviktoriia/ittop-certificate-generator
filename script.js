@@ -95,6 +95,32 @@ function generateCertHTML(name, type) {
                 </div>
                 <div class="year-stamp">${year}</div>
             </div>`;
+    } else if (type === 'firststep') {
+        return `
+            <div class="certificate cert-firststep">
+                <div class="cert-logo">${BLACK_LOGO_SVG}</div>
+                <div class="cert-content">
+                    <div class="cert-title" style="color: #1e1a2f;">СЕРТИФИКАТ</div>
+                    <div class="awarded-text" style="color: #1e1a2f;">вручается</div>
+                    <div class="recipient-name" style="color: #1e1a2f;">${safeName}</div>
+                    <div class="name-underline"></div>
+                    <div class="program-description" style="color: #1e1a2f;">об успешном завершении учебного года<br>в программе «Первый Шаг»<br>Малой Компьютерной Академии ТОП</div>
+                </div>
+                <div class="year-stamp" style="color: #1e1a2f;">${year}</div>
+            </div>`;
+    } else if (type === 'striving') {
+        return `
+            <div class="certificate cert-striving">
+                <div class="cert-logo">${BLACK_LOGO_SVG}</div>
+                <div class="cert-content">
+                    <div class="cert-title" style="color: #1e1a2f;">СЕРТИФИКАТ</div>
+                    <div class="awarded-text" style="color: #1e1a2f;">вручается</div>
+                    <div class="recipient-name" style="color: #1e1a2f;">${safeName}</div>
+                    <div class="name-underline"></div>
+                    <div class="program-description" style="color: #1e1a2f;">за стремление к IT-знаниям<br>и командную работу<br>в Малой Компьютерной Академии ТОП</div>
+                </div>
+                <div class="year-stamp" style="color: #1e1a2f;">${year}</div>
+            </div>`;
     } else if (type === 'thankyou') {
         return `
             <div class="certificate cert-thankyou">
@@ -154,11 +180,13 @@ function saveInputData() {
     const mka5Value = document.getElementById('listMka5')?.value || '';
     const mka3Value = document.getElementById('listMka3')?.value || '';
     const firstStepValue = document.getElementById('listFirstStep')?.value || '';
+    const strivingValue = document.getElementById('listStriving')?.value || '';
     const thankyouValue = document.getElementById('listThankyou')?.value || '';
     
     localStorage.setItem('cert_mka5_data', mka5Value);
     localStorage.setItem('cert_mka3_data', mka3Value);
     localStorage.setItem('cert_firststep_data', firstStepValue);
+    localStorage.setItem('cert_striving_data', strivingValue);
     localStorage.setItem('cert_thankyou_data', thankyouValue);
 }
 
@@ -166,11 +194,15 @@ function loadInputData() {
     const savedMka5 = localStorage.getItem('cert_mka5_data');
     const savedMka3 = localStorage.getItem('cert_mka3_data');
     const savedFirstStep = localStorage.getItem('cert_firststep_data');
+    const savedStriving = localStorage.getItem('cert_striving_data');
     const savedThankyou = localStorage.getItem('cert_thankyou_data');
     
     if (savedMka5) document.getElementById('listMka5').value = savedMka5;
     if (savedMka3) document.getElementById('listMka3').value = savedMka3;
     if (savedFirstStep) document.getElementById('listFirstStep').value = savedFirstStep;
+    if (savedStriving && document.getElementById('listStriving')) {
+        document.getElementById('listStriving').value = savedStriving;
+    }
     if (savedThankyou && document.getElementById('listThankyou')) {
         document.getElementById('listThankyou').value = savedThankyou;
     }
@@ -180,6 +212,7 @@ function clearSavedData() {
     localStorage.removeItem('cert_mka5_data');
     localStorage.removeItem('cert_mka3_data');
     localStorage.removeItem('cert_firststep_data');
+    localStorage.removeItem('cert_striving_data');
     localStorage.removeItem('cert_thankyou_data');
 }
 
@@ -187,11 +220,13 @@ function setupAutoSave() {
     const mka5Textarea = document.getElementById('listMka5');
     const mka3Textarea = document.getElementById('listMka3');
     const firstStepTextarea = document.getElementById('listFirstStep');
+    const strivingTextarea = document.getElementById('listStriving');
     const thankyouTextarea = document.getElementById('listThankyou');
     
     if (mka5Textarea) mka5Textarea.addEventListener('input', saveInputData);
     if (mka3Textarea) mka3Textarea.addEventListener('input', saveInputData);
     if (firstStepTextarea) firstStepTextarea.addEventListener('input', saveInputData);
+    if (strivingTextarea) strivingTextarea.addEventListener('input', saveInputData);
     if (thankyouTextarea) thankyouTextarea.addEventListener('input', saveInputData);
 }
 
@@ -275,6 +310,7 @@ async function renderCertificateToCanvasFixed(certificateData) {
         .cert-mka5 { background: url('cert_mka5_bg.png') no-repeat center center; background-size: cover; color: white; }
         .cert-mka3 { background: url('cert_mka3_bg.png') no-repeat center center; background-size: cover; color: white; }
         .cert-firststep { background: url('cert_firststep_bg.png') no-repeat center center; background-size: cover; color: black; }
+        .cert-striving { background: url('cert_striving_bg.png') no-repeat center center; background-size: cover; color: black; }
         
         .cert-thankyou {
             background: url('cert_thankyou_bg.png') no-repeat center center;
@@ -551,13 +587,15 @@ async function downloadAsPNG() {
             const canvas = await renderCertificateToCanvasFixed(certificates[i]);
             const dataUrl = canvas.toDataURL('image/png').split(',')[1];
             const name = certificates[i].name.replace(/[^а-яА-Яa-zA-Z0-9]/g, '_');
-            zip.file(`${name}_сертификат.png`, dataUrl, {base64: true});
+            const typeName = certificates[i].type === 'thankyou' ? 'благодарность' : 
+                            (certificates[i].type === 'striving' ? 'стремление' : 'сертификат');
+            zip.file(`${name}_${typeName}.png`, dataUrl, {base64: true});
         }
 
         const blob = await zip.generateAsync({type: "blob"});
         const link = document.createElement('a');
         link.href = URL.createObjectURL(blob);
-        link.download = `Сертификаты_PNG_${new Date().toISOString().slice(0,10)}.zip`;
+        link.download = `Документы_${new Date().toISOString().slice(0,10)}.zip`;
         link.click();
     } catch (e) {
         console.error(e);
@@ -610,10 +648,10 @@ document.getElementById('generateBtn').addEventListener('click', () => {
     const mka5Names = document.getElementById('listMka5').value.split(/\r?\n/).filter(n => n.trim());
     const mka3Names = document.getElementById('listMka3').value.split(/\r?\n/).filter(n => n.trim());
     const firstNames = document.getElementById('listFirstStep').value.split(/\r?\n/).filter(n => n.trim());
-    const thankyouNames = document.getElementById('listThankyou') ? 
-        document.getElementById('listThankyou').value.split(/\r?\n/).filter(n => n.trim()) : [];
+    const strivingNames = document.getElementById('listStriving')?.value.split(/\r?\n/).filter(n => n.trim()) || [];
+    const thankyouNames = document.getElementById('listThankyou')?.value.split(/\r?\n/).filter(n => n.trim()) || [];
 
-    if (mka5Names.length === 0 && mka3Names.length === 0 && firstNames.length === 0 && thankyouNames.length === 0) {
+    if (mka5Names.length === 0 && mka3Names.length === 0 && firstNames.length === 0 && strivingNames.length === 0 && thankyouNames.length === 0) {
         alert('Введите хотя бы одно имя');
         return;
     }
@@ -624,6 +662,7 @@ document.getElementById('generateBtn').addEventListener('click', () => {
     mka5Names.forEach(name => certificates.push({id: nextId++, name: name.trim(), type: 'mka5'}));
     mka3Names.forEach(name => certificates.push({id: nextId++, name: name.trim(), type: 'mka3'}));
     firstNames.forEach(name => certificates.push({id: nextId++, name: name.trim(), type: 'firststep'}));
+    strivingNames.forEach(name => certificates.push({id: nextId++, name: name.trim(), type: 'striving'}));
     thankyouNames.forEach(name => certificates.push({id: nextId++, name: name.trim(), type: 'thankyou'}));
 
     renderCertificates();
@@ -633,9 +672,12 @@ document.getElementById('generateBtn').addEventListener('click', () => {
 document.getElementById('sampleBtn').addEventListener('click', () => {
     document.getElementById('listMka5').value = "Екатерина Атомонова";
     document.getElementById('listMka3').value = "Алексей Викторов";
-    document.getElementById('listFirstStep').value = "София Крамер";
+    document.getElementById('listFirstStep').value = "Максим Дубровин";
+    if (document.getElementById('listStriving')) {
+        document.getElementById('listStriving').value = "София Крамер";
+    }
     if (document.getElementById('listThankyou')) {
-        document.getElementById('listThankyou').value = "Иван Смирнов";
+        document.getElementById('listThankyou').value = "Анна Коваленко";
     }
     saveInputData();
 });
@@ -647,9 +689,8 @@ document.getElementById('clearAllBtn').addEventListener('click', () => {
         document.getElementById('listMka5').value = '';
         document.getElementById('listMka3').value = '';
         document.getElementById('listFirstStep').value = '';
-        if (document.getElementById('listThankyou')) {
-            document.getElementById('listThankyou').value = '';
-        }
+        if (document.getElementById('listStriving')) document.getElementById('listStriving').value = '';
+        if (document.getElementById('listThankyou')) document.getElementById('listThankyou').value = '';
         clearSavedData();
     }
 });
