@@ -67,8 +67,8 @@ function escapeHtml(str) {
 
 function generateCertHTML(name, type) {
     const safeName = escapeHtml(name.trim());
-    const year = "2026";
-
+    const year = new Date().getFullYear();
+    
     if (type === 'mka5') {
         return `
             <div class="certificate cert-mka5">
