@@ -64,7 +64,7 @@ const container = document.getElementById('certificatesContainer');
 const counterSpan = document.getElementById('counterDisplay');
 const customCounterSpan = document.getElementById('customCounterDisplay');
 
-// ====================== ГЕНЕРАЦИЯ HTML ======================
+// ГЕНЕРАЦИЯ HTML
 function escapeHtml(str) {
     return str.replace(/[&<>]/g, m => m === '&' ? '&amp;' : m === '<' ? '&lt;' : '&gt;');
 }
@@ -191,7 +191,7 @@ function generateCustomCertHTML(name, isPreview = false) {
     const year = new Date().getFullYear();
     const title = document.getElementById('customTitle')?.value || 'ПОЧЁТНАЯ ГРАМОТА';
     const awardedText = document.getElementById('customAwarded')?.value || 'вручается';
-    const description = document.getElementById('customDescription')?.value || 'основное описание';
+    const description = document.getElementById('customDescription')?.value || '';
     const description2 = document.getElementById('customDescription2')?.value || 'Администрация Компьютерной Академии ТОП выражает искреннюю благодарность за высокий уровень профессионализма, ответственное отношение к образовательному процессу и значительный вклад в развитие учебной деятельности филиала.';
     const directorName = document.getElementById('directorName')?.value || 'Горбунова Наталья';
     const directorTitle = document.getElementById('directorTitle')?.value || 'Директор';
@@ -229,7 +229,7 @@ function updatePreview() {
     }
 }
 
-// ====================== СОХРАНЕНИЕ ДАННЫХ ======================
+// СОХРАНЕНИЕ ДАННЫХ
 function saveInputData() {
     const mka5Value = document.getElementById('listMka5')?.value || '';
     const mka3Value = document.getElementById('listMka3')?.value || '';
@@ -339,7 +339,7 @@ function setupAutoSave() {
     });
 }
 
-// ====================== ОВЕРЛЕЙ ======================
+// ОВЕРЛЕЙ
 function showLoadingOverlay(message = "Обработка...") {
     let overlay = document.getElementById('loadingOverlay');
     if (!overlay) {
@@ -373,7 +373,7 @@ function hideLoadingOverlay() {
     if (overlay) overlay.style.display = 'none';
 }
 
-// ====================== РЕНДЕР ЧЕРЕЗ IFrame ======================
+// РЕНДЕР ЧЕРЕЗ IFrame
 async function renderCertificateToCanvasFixed(certificateData, isCustom = false) {
     const iframe = document.createElement('iframe');
     iframe.style.position = 'fixed';
@@ -413,23 +413,223 @@ async function renderCertificateToCanvasFixed(certificateData, isCustom = false)
             border: none;
             outline: none;
         }
+        .cert-mka5 { background: url('cert_mka5_bg.png') no-repeat center center; background-size: cover; color: white; }
+        .cert-mka3 { background: url('cert_mka3_bg.png') no-repeat center center; background-size: cover; color: white; }
+        .cert-firststep { background: url('cert_firststep_bg.png') no-repeat center center; background-size: cover; color: black; }
+        .cert-striving { background: url('cert_striving_bg.png') no-repeat center center; background-size: cover; color: black; }
+        .cert-thankyou {
+            background: url('cert_thankyou_bg.png') no-repeat center center;
+            background-size: cover;
+            color: #1e1a2f;
+            font-family: 'Nunito', sans-serif;
+            padding: 50px 60px;
+            position: relative;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .thankyou-content {
+            width: 100%;
+            max-width: 100%;
+            display: flex;
+            flex-direction: column;
+            text-align: left;
+            position: relative;
+        }
+        .thankyou-title {
+            font-family: 'Playfair Display', serif;
+            font-size: 52px;
+            font-weight: 300;
+            color: #1e1a2f;
+            margin-bottom: 20px;
+            line-height: 1;
+        }
+        .thankyou-parents {
+            font-size: 32px;
+            font-weight: 300;
+            letter-spacing: 2px;
+            margin-bottom: 15px;
+            color: #1e1a2f;
+        }
+        .thankyou-start {
+            font-size: 24px;
+            font-weight: 600;
+            margin-bottom: 15px;
+            color: #1e1a2f;
+        }
+        .thankyou-child-name {
+            font-family: 'Caveat', cursive;
+            font-size: 52px;
+            font-weight: 600;
+            margin: 0px 0 10px 0;
+            color: #A71132;
+            display: inline-block;
+            padding-bottom: 10px;
+            line-height: 1;
+        }
+        .thankyou-text {
+            font-size: 18px;
+            line-height: 1.4;
+            margin-bottom: 15px;
+            color: #1e1a2f;
+        }
+        .thankyou-two-columns {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            gap: 40px;
+        }
+        .thankyou-left {
+            flex: 1;
+            text-align: left;
+        }
+        .thankyou-signature {
+            font-size: 18px;
+            line-height: 1.4;
+            color: #1e1a2f;
+        }
+        .thankyou-right {
+            flex-shrink: 0;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            text-align: center;
+        }
+        .thankyou-logo {
+            display: flex;
+            justify-content: center;
+            margin-bottom: 20px;
+        }
+        .thankyou-logo svg {
+            width: 160px;
+            height: auto;
+        }
+        .thankyou-director-line {
+            width: 120%;
+            height: 1px;
+            background: #1e1a2f;
+            margin: 10px 0;
+        }
+        .thankyou-director {
+            font-family: 'Playfair Display', serif;
+            font-size: 24px;
+            font-weight: 300;
+            text-align: center;
+            color: #1e1a2f;
+        }
+        .director-title {
+            font-size: 18px;
+            font-weight: 400;
+            font-family: 'Nunito', sans-serif;
+        }
         .cert-logo { margin-bottom: 15px; display: flex; justify-content: center; align-items: center; width: 100%; }
         .cert-logo svg { width: 160px; height: auto; display: block; }
         .cert-content { flex: 1; display: flex; flex-direction: column; justify-content: center; align-items: center; width: 100%; }
-        .cert-title { font-family: 'Playfair Display', serif; font-weight: 400; font-size: 60px; letter-spacing: 3px; margin: 20px 0 15px 0; text-transform: uppercase; }
-        .awarded-text { font-family: 'Montserrat', sans-serif; font-size: 21px; font-weight: 300; letter-spacing: 1px; margin: 10px 0 5px 0; }
-        .recipient-name { font-family: 'Caveat', cursive; font-weight: 400; font-size: 52px; margin: 5px 0 0 0; line-height: 1.2; word-break: break-word; max-width: 100%; }
-        .name-underline { width: 85%; max-width: 500px; min-width: 240px; height: 2px; margin: 0 auto 20px auto; background: #1e1a2f; }
-        .program-description { font-family: 'Montserrat', sans-serif; font-size: 19px; font-weight: 400; line-height: 1.5; margin: 15px 0 10px 0; }
-        .program-description.second-text { margin-top: 20px; }
-        .year-stamp { font-family: 'Montserrat', sans-serif; font-size: 19px; letter-spacing: 2px; font-weight: 400; margin-top: 20px; }
-        .custom-footer { display: flex; justify-content: flex-end; margin-top: 20px; }
-        .custom-signature-block { text-align: right; }
-        .custom-signature-img { margin-bottom: 8px; }
-        .custom-signature-img img { max-height: 100px; width: auto; }
-        .signature-line { width: 120%; height: 1px; background: #1e1a2f; margin: 8px 0; }
-        .custom-director-name { font-family: 'Playfair Display', serif; font-size: 18px; font-weight: 400; margin-top: 5px; }
-        .custom-director-title { font-size: 14px; font-weight: 400; font-family: 'Nunito', sans-serif; }
+        
+        /* Стиль для заголовка в готовых шаблонах */
+        .cert-mka5 .cert-title,
+        .cert-mka3 .cert-title,
+        .cert-firststep .cert-title,
+        .cert-striving .cert-title,
+        .cert-thankyou .cert-title {
+            font-family: 'Roboto', sans-serif;
+            font-weight: 700;
+            font-size: 60px;
+            letter-spacing: 3px;
+            margin: 20px 0 15px 0;
+            text-transform: uppercase;
+        }
+        
+        /* Стиль для заголовка в кастомном сертификате */
+        .cert-custom .cert-title {
+            font-family: 'Playfair Display', serif !important;
+            font-weight: 400 !important;
+            font-size: 60px;
+            letter-spacing: 3px;
+            margin: 20px 0 15px 0;
+            text-transform: uppercase;
+        }
+        
+        .awarded-text {
+            font-family: 'Montserrat', sans-serif;
+            font-size: 21px;
+            font-weight: 300;
+            letter-spacing: 1px;
+            margin: 10px 0 5px 0;
+        }
+        .recipient-name {
+            font-family: 'Caveat', cursive;
+            font-weight: 400;
+            font-size: 52px;
+            margin: 5px 0 0 0;
+            line-height: 1.2;
+            word-break: break-word;
+            max-width: 100%;
+        }
+        .name-underline {
+            width: 85%;
+            max-width: 500px;
+            min-width: 240px;
+            height: 2px;
+            margin: 0 auto 20px auto;
+            background: currentColor;
+        }
+        .program-description {
+            font-family: 'Montserrat', sans-serif;
+            font-size: 19px;
+            font-weight: 400;
+            line-height: 1.5;
+            margin: 15px 0 10px 0;
+        }
+        .program-description.second-text {
+            margin-top: 20px;
+        }
+        .year-stamp {
+            font-family: 'Montserrat', sans-serif;
+            font-size: 19px;
+            letter-spacing: 2px;
+            font-weight: 400;
+            margin-top: 20px;
+        }
+        .custom-footer {
+            display: flex;
+            justify-content: flex-end;
+            margin-top: 20px;
+        }
+        .custom-signature-block {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            text-align: center;
+            max-width: 280px;
+        }
+        .custom-signature-img {
+            margin-bottom: 8px;
+            display: flex;
+            justify-content: center;
+        }
+        .custom-signature-img img {
+            max-height: 100px;
+            width: auto;
+        }
+        .signature-line {
+            width: 100%;
+            height: 1px;
+            background: #1e1a2f;
+            margin: 8px 0;
+        }
+        .custom-director-name {
+            font-family: 'Playfair Display', serif;
+            font-size: 18px;
+            font-weight: 400;
+            margin-top: 5px;
+        }
+        .custom-director-title {
+            font-size: 14px;
+            font-weight: 400;
+            font-family: 'Playfair Display', serif;
+            margin-top: 2px;
+        }
     `;
     iframeDoc.head.appendChild(fixedStyles);
     
@@ -437,7 +637,7 @@ async function renderCertificateToCanvasFixed(certificateData, isCustom = false)
     if (isCustom) {
         const title = document.getElementById('customTitle')?.value || 'ПОЧЁТНАЯ ГРАМОТА';
         const awardedText = document.getElementById('customAwarded')?.value || 'вручается';
-        const description = document.getElementById('customDescription')?.value || 'основное описание';
+        const description = document.getElementById('customDescription')?.value || '';
         const description2 = document.getElementById('customDescription2')?.value || 'Администрация Компьютерной Академии ТОП выражает искреннюю благодарность за высокий уровень профессионализма, ответственное отношение к образовательному процессу и значительный вклад в развитие учебной деятельности филиала.';
         const directorName = document.getElementById('directorName')?.value || 'Горбунова Наталья';
         const directorTitle = document.getElementById('directorTitle')?.value || 'Директор';
@@ -464,6 +664,7 @@ async function renderCertificateToCanvasFixed(certificateData, isCustom = false)
                         <div class="custom-director-title" style="color: #1e1a2f;">${escapeHtml(directorTitle)}</div>
                     </div>
                 </div>
+                <div class="year-stamp" style="color: #1e1a2f;">${new Date().getFullYear()}</div>
             </div>`;
     } else {
         certHtml = generateCertHTML(certificateData.name, certificateData.type);
@@ -482,7 +683,7 @@ async function renderCertificateToCanvasFixed(certificateData, isCustom = false)
     const canvas = await html2canvas(certElement, {
         scale: 3,
         useCORS: true,
-        backgroundColor: null,
+        backgroundColor: '#ffffff',
         logging: false,
         allowTaint: false,
         imageTimeout: 0
@@ -492,7 +693,7 @@ async function renderCertificateToCanvasFixed(certificateData, isCustom = false)
     return canvas;
 }
 
-// ====================== PDF И PNG ======================
+// PDF И PNG
 async function downloadAsPDF() {
     if (certificates.length === 0) return alert('Нет сертификатов');
 
@@ -568,7 +769,7 @@ async function downloadAsPNG() {
 async function downloadCustomAsPDF() {
     if (customCertificates.length === 0) return alert('Нет документов');
 
-    const pdfBtn = document.getElementById('pdfDownloadBtn');
+    const pdfBtn = document.getElementById('pdfCustomDownloadBtn');
     const originalText = pdfBtn.innerHTML;
 
     pdfBtn.disabled = true;
@@ -602,7 +803,7 @@ async function downloadCustomAsPDF() {
 async function downloadCustomAsPNG() {
     if (customCertificates.length === 0) return alert('Нет документов');
 
-    const pngBtn = document.getElementById('pngDownloadBtn');
+    const pngBtn = document.getElementById('pngCustomDownloadBtn');
     const originalText = pngBtn.innerHTML;
 
     pngBtn.disabled = true;
@@ -635,7 +836,7 @@ async function downloadCustomAsPNG() {
     }
 }
 
-// ====================== ОТРИСОВКА НА ЭКРАНЕ ======================
+// ОТРИСОВКА НА ЭКРАНЕ
 function renderCertificates() {
     if (certificates.length === 0) {
         if (!document.getElementById('tab-custom') || !document.getElementById('tab-custom').classList.contains('active')) {
@@ -712,7 +913,7 @@ function handleCustomDelete(e) {
     }
 }
 
-// ====================== ОБРАБОТЧИКИ ======================
+// ОБРАБОТЧИКИ
 document.getElementById('generateBtn')?.addEventListener('click', () => {
     const mka5Names = document.getElementById('listMka5').value.split(/\r?\n/).filter(n => n.trim());
     const mka3Names = document.getElementById('listMka3').value.split(/\r?\n/).filter(n => n.trim());
@@ -793,7 +994,7 @@ document.getElementById('clearCustomBtn')?.addEventListener('click', () => {
     }
 });
 
-// ====================== ВКЛАДКИ И ПРЕВЬЮ ======================
+// ВКЛАДКИ И ПРЕВЬЮ
 function initTabs() {
     const tabBtns = document.querySelectorAll('.tab-btn');
     const tabContents = document.querySelectorAll('.tab-content');
@@ -870,7 +1071,7 @@ function initDownloadButtons() {
     }
 }
 
-// ====================== ИНИЦИАЛИЗАЦИЯ ======================
+// ИНИЦИАЛИЗАЦИЯ
 loadInputData();
 loadCustomInputData();
 setupAutoSave();
@@ -878,4 +1079,4 @@ initCustomTab();
 initTabs();
 initDownloadButtons();
 renderCertificates();
-updatePreview();ы
+updatePreview();
