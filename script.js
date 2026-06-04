@@ -56,11 +56,15 @@ const BLACK_LOGO_SVG = `<svg width="60" height="49" viewBox="0 0 60 49" fill="no
 
 let certificates = [];
 let nextId = 1;
+let customCertificates = [];
+let customNextId = 1;
+let selectedBg = 'custom_bg_1.png';
 
 const container = document.getElementById('certificatesContainer');
 const counterSpan = document.getElementById('counterDisplay');
+const customCounterSpan = document.getElementById('customCounterDisplay');
 
-// ГЕНЕРАЦИЯ HTML
+// ====================== ГЕНЕРАЦИЯ HTML ======================
 function escapeHtml(str) {
     return str.replace(/[&<>]/g, m => m === '&' ? '&amp;' : m === '<' ? '&lt;' : '&gt;');
 }
@@ -175,7 +179,57 @@ function generateCertHTML(name, type) {
     }
 }
 
-// СОХРАНЕНИЕ ДАННЫХ В localStorage
+function getBackgroundStyle() {
+    if (selectedBg) {
+        return `background: url('${selectedBg}') no-repeat center center; background-size: cover;`;
+    }
+    return `background: url('custom_bg_1.png') no-repeat center center; background-size: cover;`;
+}
+
+function generateCustomCertHTML(name, isPreview = false) {
+    const safeName = escapeHtml(name?.trim() || (isPreview ? 'Иванов Иван Иванович' : ''));
+    const year = new Date().getFullYear();
+    const title = document.getElementById('customTitle')?.value || 'ПОЧЁТНАЯ ГРАМОТА';
+    const awardedText = document.getElementById('customAwarded')?.value || 'вручается';
+    const description = document.getElementById('customDescription')?.value || 'основное описание';
+    const description2 = document.getElementById('customDescription2')?.value || 'Администрация Компьютерной Академии ТОП выражает искреннюю благодарность за высокий уровень профессионализма, ответственное отношение к образовательному процессу и значительный вклад в развитие учебной деятельности филиала.';
+    const directorName = document.getElementById('directorName')?.value || 'Горбунова Наталья';
+    const directorTitle = document.getElementById('directorTitle')?.value || 'Директор';
+    const bgStyle = getBackgroundStyle();
+    
+    const signatureHtml = `<div class="custom-signature-img"><img src="signature.png" alt="Подпись" style="max-height: 100px;"></div>`;
+    
+    return `
+        <div class="certificate cert-custom" style="${bgStyle} color: #1e1a2f;">
+            <div class="cert-logo">${BLACK_LOGO_SVG}</div>
+            <div class="cert-content">
+                <div class="cert-title" style="color: #1e1a2f;">${escapeHtml(title)}</div>
+                <div class="awarded-text" style="color: #1e1a2f;">${escapeHtml(awardedText)}</div>
+                <div class="recipient-name" style="color: #1e1a2f;">${safeName}</div>
+                <div class="name-underline"></div>
+                <div class="program-description" style="color: #1e1a2f;">${escapeHtml(description).replace(/\n/g, '<br>')}</div>
+                <div class="program-description second-text" style="color: #1e1a2f;">${escapeHtml(description2).replace(/\n/g, '<br>')}</div>
+            </div>
+            <div class="custom-footer">
+                <div class="custom-signature-block">
+                    ${signatureHtml}
+                    <div class="signature-line"></div>
+                    <div class="custom-director-name" style="color: #1e1a2f;">${escapeHtml(directorName)}</div>
+                    <div class="custom-director-title" style="color: #1e1a2f;">${escapeHtml(directorTitle)}</div>
+                </div>
+            </div>
+            <div class="year-stamp" style="color: #1e1a2f;">${year}</div>
+        </div>`;
+}
+
+function updatePreview() {
+    const previewContainer = document.getElementById('customPreview');
+    if (previewContainer) {
+        previewContainer.innerHTML = generateCustomCertHTML('', true);
+    }
+}
+
+// ====================== СОХРАНЕНИЕ ДАННЫХ ======================
 function saveInputData() {
     const mka5Value = document.getElementById('listMka5')?.value || '';
     const mka3Value = document.getElementById('listMka3')?.value || '';
@@ -208,6 +262,56 @@ function loadInputData() {
     }
 }
 
+function saveCustomInputData() {
+    const customNames = document.getElementById('listCustom')?.value || '';
+    const customTitle = document.getElementById('customTitle')?.value || '';
+    const customAwarded = document.getElementById('customAwarded')?.value || '';
+    const customDescription = document.getElementById('customDescription')?.value || '';
+    const customDescription2 = document.getElementById('customDescription2')?.value || '';
+    const directorName = document.getElementById('directorName')?.value || '';
+    const directorTitle = document.getElementById('directorTitle')?.value || '';
+    
+    localStorage.setItem('custom_names', customNames);
+    localStorage.setItem('custom_title', customTitle);
+    localStorage.setItem('custom_awarded', customAwarded);
+    localStorage.setItem('custom_description', customDescription);
+    localStorage.setItem('custom_description2', customDescription2);
+    localStorage.setItem('custom_directorName', directorName);
+    localStorage.setItem('custom_directorTitle', directorTitle);
+    localStorage.setItem('custom_selectedBg', selectedBg);
+}
+
+function loadCustomInputData() {
+    const savedNames = localStorage.getItem('custom_names');
+    const savedTitle = localStorage.getItem('custom_title');
+    const savedAwarded = localStorage.getItem('custom_awarded');
+    const savedDescription = localStorage.getItem('custom_description');
+    const savedDescription2 = localStorage.getItem('custom_description2');
+    const savedDirectorName = localStorage.getItem('custom_directorName');
+    const savedDirectorTitle = localStorage.getItem('custom_directorTitle');
+    const savedSelectedBg = localStorage.getItem('custom_selectedBg');
+    
+    if (savedNames) document.getElementById('listCustom').value = savedNames;
+    if (savedTitle) document.getElementById('customTitle').value = savedTitle;
+    if (savedAwarded) document.getElementById('customAwarded').value = savedAwarded;
+    if (savedDescription) document.getElementById('customDescription').value = savedDescription;
+    if (savedDescription2) document.getElementById('customDescription2').value = savedDescription2;
+    if (savedDirectorName) document.getElementById('directorName').value = savedDirectorName;
+    if (savedDirectorTitle) document.getElementById('directorTitle').value = savedDirectorTitle;
+    if (savedSelectedBg) selectedBg = savedSelectedBg;
+    
+    updatePreview();
+    
+    document.querySelectorAll('.bg-preview').forEach(el => {
+        const bgValue = el.getAttribute('data-bg');
+        if (bgValue === selectedBg) {
+            el.classList.add('selected');
+        } else {
+            el.classList.remove('selected');
+        }
+    });
+}
+
 function clearSavedData() {
     localStorage.removeItem('cert_mka5_data');
     localStorage.removeItem('cert_mka3_data');
@@ -216,21 +320,26 @@ function clearSavedData() {
     localStorage.removeItem('cert_thankyou_data');
 }
 
-function setupAutoSave() {
-    const mka5Textarea = document.getElementById('listMka5');
-    const mka3Textarea = document.getElementById('listMka3');
-    const firstStepTextarea = document.getElementById('listFirstStep');
-    const strivingTextarea = document.getElementById('listStriving');
-    const thankyouTextarea = document.getElementById('listThankyou');
-    
-    if (mka5Textarea) mka5Textarea.addEventListener('input', saveInputData);
-    if (mka3Textarea) mka3Textarea.addEventListener('input', saveInputData);
-    if (firstStepTextarea) firstStepTextarea.addEventListener('input', saveInputData);
-    if (strivingTextarea) strivingTextarea.addEventListener('input', saveInputData);
-    if (thankyouTextarea) thankyouTextarea.addEventListener('input', saveInputData);
+function clearCustomSavedData() {
+    localStorage.removeItem('custom_names');
+    localStorage.removeItem('custom_title');
+    localStorage.removeItem('custom_awarded');
+    localStorage.removeItem('custom_description');
+    localStorage.removeItem('custom_description2');
+    localStorage.removeItem('custom_directorName');
+    localStorage.removeItem('custom_directorTitle');
+    localStorage.removeItem('custom_selectedBg');
 }
 
-// ОВЕРЛЕЙ
+function setupAutoSave() {
+    const fields = ['listMka5', 'listMka3', 'listFirstStep', 'listStriving', 'listThankyou'];
+    fields.forEach(id => {
+        const el = document.getElementById(id);
+        if (el) el.addEventListener('input', saveInputData);
+    });
+}
+
+// ====================== ОВЕРЛЕЙ ======================
 function showLoadingOverlay(message = "Обработка...") {
     let overlay = document.getElementById('loadingOverlay');
     if (!overlay) {
@@ -264,8 +373,8 @@ function hideLoadingOverlay() {
     if (overlay) overlay.style.display = 'none';
 }
 
-// РЕНДЕР ЧЕРЕЗ IFrame
-async function renderCertificateToCanvasFixed(certificateData) {
+// ====================== РЕНДЕР ЧЕРЕЗ IFrame ======================
+async function renderCertificateToCanvasFixed(certificateData, isCustom = false) {
     const iframe = document.createElement('iframe');
     iframe.style.position = 'fixed';
     iframe.style.top = '-9999px';
@@ -282,7 +391,6 @@ async function renderCertificateToCanvasFixed(certificateData) {
         @import url('https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;500;600;700&family=Roboto:wght@400;700&family=Caveat:wght@400;500;600;700&family=Nunito:wght@300;400;500;600;700;800&family=Playfair+Display:wght@400;500;600;700&display=swap');
         
         * { margin: 0; padding: 0; box-sizing: border-box; }
-        
         body {
             width: 210mm;
             height: 297mm;
@@ -290,7 +398,6 @@ async function renderCertificateToCanvasFixed(certificateData) {
             padding: 0;
             background: transparent;
         }
-        
         .certificate {
             width: 210mm;
             height: 297mm;
@@ -306,219 +413,71 @@ async function renderCertificateToCanvasFixed(certificateData) {
             border: none;
             outline: none;
         }
-        
-        .cert-mka5 { background: url('cert_mka5_bg.png') no-repeat center center; background-size: cover; color: white; }
-        .cert-mka3 { background: url('cert_mka3_bg.png') no-repeat center center; background-size: cover; color: white; }
-        .cert-firststep { background: url('cert_firststep_bg.png') no-repeat center center; background-size: cover; color: black; }
-        .cert-striving { background: url('cert_striving_bg.png') no-repeat center center; background-size: cover; color: black; }
-        
-        .cert-thankyou {
-            background: url('cert_thankyou_bg.png') no-repeat center center;
-            background-size: cover;
-            color: #1e1a2f;
-            font-family: 'Nunito', sans-serif;
-            padding: 50px 60px;
-            position: relative;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-        }
-        
-        .thankyou-content {
-            width: 100%;
-            max-width: 100%;
-            display: flex;
-            flex-direction: column;
-            text-align: left;
-            position: relative;
-        }
-        
-        .thankyou-title {
-            font-family: 'Playfair Display', serif;
-            font-size: 52px;
-            font-weight: 300;
-            color: #1e1a2f;
-            margin-bottom: 20px;
-            line-height: 1;
-        }
-        
-        .thankyou-parents {
-            font-size: 32px;
-            font-weight: 300;
-            letter-spacing: 2px;
-            margin-bottom: 15px;
-            color: #1e1a2f;
-        }
-        
-        .thankyou-start {
-            font-size: 24px;
-            font-weight: 600;
-            margin-bottom: 15px;
-            color: #1e1a2f;
-        }
-        
-        .thankyou-child-name {
-            font-family: 'Caveat', cursive;
-            font-size: 52px;
-            font-weight: 600;
-            margin: 0px 0 10px 0;
-            color: #A71132;
-            display: inline-block;
-            padding-bottom: 10px;
-            line-height: 1;
-        }
-        
-        .thankyou-text {
-            font-size: 18px;
-            line-height: 1.4;
-            margin-bottom: 15px;
-            color: #1e1a2f;
-        }
-        
-        .thankyou-two-columns {
-            display: flex;
-            justify-content: space-between;
-            align-items: flex-start;
-            gap: 40px;
-        }
-        
-        .thankyou-left {
-            flex: 1;
-            text-align: left;
-        }
-        
-        .thankyou-signature {
-            font-size: 18px;
-            line-height: 1.4;
-            color: #1e1a2f;
-        }
-        
-        .thankyou-right {
-            flex-shrink: 0;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            text-align: center;
-        }
-        
-        .thankyou-logo {
-            display: flex;
-            justify-content: center;
-            margin-bottom: 20px;
-        }
-        
-        .thankyou-logo svg {
-            width: 160px;
-            height: auto;
-        }
-        
-        .thankyou-director-line {
-            width: 120%;
-            height: 1px;
-            background: #1e1a2f;
-            margin: 10px 0;
-        }
-        
-        .thankyou-director {
-            font-family: 'Playfair Display', serif;
-            font-size: 24px;
-            font-weight: 300;
-            text-align: center;
-            color: #1e1a2f;
-        }
-        
-        .director-title {
-            font-size: 18px;
-            font-weight: 400;
-            font-family: 'Nunito', sans-serif;
-        }
-        
-        .cert-logo {
-            margin-bottom: 15px;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            width: 100%;
-        }
-        
-        .cert-logo svg {
-            width: 160px;
-            height: auto;
-            display: block;
-        }
-        
-        .cert-content {
-            flex: 1;
-            display: flex;
-            flex-direction: column;
-            justify-content: center;
-            align-items: center;
-            width: 100%;
-        }
-        
-        .cert-title {
-            font-family: 'Roboto', sans-serif;
-            font-weight: 700;
-            font-size: 60px;
-            letter-spacing: 3px;
-            margin: 20px 0 15px 0;
-            text-transform: uppercase;
-        }
-        
-        .awarded-text {
-            font-family: 'Montserrat', sans-serif;
-            font-size: 21px;
-            font-weight: 300;
-            letter-spacing: 1px;
-            margin: 10px 0 5px 0;
-        }
-        
-        .recipient-name {
-            font-family: 'Caveat', cursive;
-            font-weight: 400;
-            font-size: 52px;
-            margin: 5px 0 0 0;
-            line-height: 1.2;
-            word-break: break-word;
-            max-width: 100%;
-        }
-        
-        .name-underline {
-            width: 85%;
-            max-width: 500px;
-            min-width: 240px;
-            height: 2px;
-            margin: 0 auto 20px auto;
-            background: currentColor;
-        }
-        
-        .program-description {
-            font-family: 'Montserrat', sans-serif;
-            font-size: 19px;
-            font-weight: 400;
-            line-height: 1.5;
-            margin: 15px 0 10px 0;
-        }
-        
-        .year-stamp {
-            font-family: 'Montserrat', sans-serif;
-            font-size: 19px;
-            letter-spacing: 2px;
-            font-weight: 400;
-            margin-top: 20px;
-        }
+        .cert-logo { margin-bottom: 15px; display: flex; justify-content: center; align-items: center; width: 100%; }
+        .cert-logo svg { width: 160px; height: auto; display: block; }
+        .cert-content { flex: 1; display: flex; flex-direction: column; justify-content: center; align-items: center; width: 100%; }
+        .cert-title { font-family: 'Playfair Display', serif; font-weight: 400; font-size: 60px; letter-spacing: 3px; margin: 20px 0 15px 0; text-transform: uppercase; }
+        .awarded-text { font-family: 'Montserrat', sans-serif; font-size: 21px; font-weight: 300; letter-spacing: 1px; margin: 10px 0 5px 0; }
+        .recipient-name { font-family: 'Caveat', cursive; font-weight: 400; font-size: 52px; margin: 5px 0 0 0; line-height: 1.2; word-break: break-word; max-width: 100%; }
+        .name-underline { width: 85%; max-width: 500px; min-width: 240px; height: 2px; margin: 0 auto 20px auto; background: #1e1a2f; }
+        .program-description { font-family: 'Montserrat', sans-serif; font-size: 19px; font-weight: 400; line-height: 1.5; margin: 15px 0 10px 0; }
+        .program-description.second-text { margin-top: 20px; }
+        .year-stamp { font-family: 'Montserrat', sans-serif; font-size: 19px; letter-spacing: 2px; font-weight: 400; margin-top: 20px; }
+        .custom-footer { display: flex; justify-content: flex-end; margin-top: 20px; }
+        .custom-signature-block { text-align: right; }
+        .custom-signature-img { margin-bottom: 8px; }
+        .custom-signature-img img { max-height: 100px; width: auto; }
+        .signature-line { width: 120%; height: 1px; background: #1e1a2f; margin: 8px 0; }
+        .custom-director-name { font-family: 'Playfair Display', serif; font-size: 18px; font-weight: 400; margin-top: 5px; }
+        .custom-director-title { font-size: 14px; font-weight: 400; font-family: 'Nunito', sans-serif; }
     `;
     iframeDoc.head.appendChild(fixedStyles);
     
-    const certHtml = generateCertHTML(certificateData.name, certificateData.type);
-    iframeDoc.body.innerHTML = certHtml;
+    let certHtml;
+    if (isCustom) {
+        const title = document.getElementById('customTitle')?.value || 'ПОЧЁТНАЯ ГРАМОТА';
+        const awardedText = document.getElementById('customAwarded')?.value || 'вручается';
+        const description = document.getElementById('customDescription')?.value || 'основное описание';
+        const description2 = document.getElementById('customDescription2')?.value || 'Администрация Компьютерной Академии ТОП выражает искреннюю благодарность за высокий уровень профессионализма, ответственное отношение к образовательному процессу и значительный вклад в развитие учебной деятельности филиала.';
+        const directorName = document.getElementById('directorName')?.value || 'Горбунова Наталья';
+        const directorTitle = document.getElementById('directorTitle')?.value || 'Директор';
+        const bgStyle = getBackgroundStyle();
+        
+        const signatureHtml = `<div class="custom-signature-img"><img src="signature.png" alt="Подпись" style="max-height: 100px;"></div>`;
+        
+        certHtml = `
+            <div class="certificate cert-custom" style="${bgStyle} color: #1e1a2f;">
+                <div class="cert-logo">${BLACK_LOGO_SVG}</div>
+                <div class="cert-content">
+                    <div class="cert-title" style="color: #1e1a2f;">${escapeHtml(title)}</div>
+                    <div class="awarded-text" style="color: #1e1a2f;">${escapeHtml(awardedText)}</div>
+                    <div class="recipient-name" style="color: #1e1a2f;">${escapeHtml(certificateData.name)}</div>
+                    <div class="name-underline"></div>
+                    <div class="program-description" style="color: #1e1a2f;">${escapeHtml(description).replace(/\n/g, '<br>')}</div>
+                    <div class="program-description second-text" style="color: #1e1a2f;">${escapeHtml(description2).replace(/\n/g, '<br>')}</div>
+                </div>
+                <div class="custom-footer">
+                    <div class="custom-signature-block">
+                        ${signatureHtml}
+                        <div class="signature-line"></div>
+                        <div class="custom-director-name" style="color: #1e1a2f;">${escapeHtml(directorName)}</div>
+                        <div class="custom-director-title" style="color: #1e1a2f;">${escapeHtml(directorTitle)}</div>
+                    </div>
+                </div>
+            </div>`;
+    } else {
+        certHtml = generateCertHTML(certificateData.name, certificateData.type);
+    }
     
+    iframeDoc.body.innerHTML = certHtml;
     await new Promise(r => setTimeout(r, 200));
     
     const certElement = iframeDoc.querySelector('.certificate');
-    certElement.style.border = 'none';
-    certElement.style.outline = 'none';
-    certElement.style.boxShadow = 'none';
+    if (certElement) {
+        certElement.style.border = 'none';
+        certElement.style.outline = 'none';
+        certElement.style.boxShadow = 'none';
+    }
     
     const canvas = await html2canvas(certElement, {
         scale: 3,
@@ -533,7 +492,7 @@ async function renderCertificateToCanvasFixed(certificateData) {
     return canvas;
 }
 
-// PDF
+// ====================== PDF И PNG ======================
 async function downloadAsPDF() {
     if (certificates.length === 0) return alert('Нет сертификатов');
 
@@ -552,7 +511,7 @@ async function downloadAsPDF() {
             if (i > 0) pdf.addPage();
             updateProgressDetail(`Страница ${i+1} из ${certificates.length}...`);
 
-            const canvas = await renderCertificateToCanvasFixed(certificates[i]);
+            const canvas = await renderCertificateToCanvasFixed(certificates[i], false);
             const imgData = canvas.toDataURL('image/png', 1.0);
             pdf.addImage(imgData, 'PNG', 0, 0, 210, 297);
         }
@@ -568,7 +527,6 @@ async function downloadAsPDF() {
     }
 }
 
-// PNG
 async function downloadAsPNG() {
     if (certificates.length === 0) return alert('Нет сертификатов');
 
@@ -584,7 +542,7 @@ async function downloadAsPNG() {
 
         for (let i = 0; i < certificates.length; i++) {
             updateProgressDetail(`Файл ${i+1} из ${certificates.length}...`);
-            const canvas = await renderCertificateToCanvasFixed(certificates[i]);
+            const canvas = await renderCertificateToCanvasFixed(certificates[i], false);
             const dataUrl = canvas.toDataURL('image/png').split(',')[1];
             const name = certificates[i].name.replace(/[^а-яА-Яa-zA-Z0-9]/g, '_');
             const typeName = certificates[i].type === 'thankyou' ? 'благодарность' : 
@@ -607,29 +565,101 @@ async function downloadAsPNG() {
     }
 }
 
-// ОТРИСОВКА НА ЭКРАНЕ
+async function downloadCustomAsPDF() {
+    if (customCertificates.length === 0) return alert('Нет документов');
+
+    const pdfBtn = document.getElementById('pdfDownloadBtn');
+    const originalText = pdfBtn.innerHTML;
+
+    pdfBtn.disabled = true;
+    pdfBtn.innerHTML = '⏳ Генерируется...';
+    showLoadingOverlay(`Создание PDF (${customCertificates.length} шт.)...`);
+
+    try {
+        const { jsPDF } = window.jspdf;
+        const pdf = new jsPDF({ orientation: 'portrait', unit: 'mm', format: 'a4' });
+
+        for (let i = 0; i < customCertificates.length; i++) {
+            if (i > 0) pdf.addPage();
+            updateProgressDetail(`Страница ${i+1} из ${customCertificates.length}...`);
+
+            const canvas = await renderCertificateToCanvasFixed(customCertificates[i], true);
+            const imgData = canvas.toDataURL('image/png', 1.0);
+            pdf.addImage(imgData, 'PNG', 0, 0, 210, 297);
+        }
+
+        pdf.save(`Документы_${new Date().toISOString().slice(0,10)}.pdf`);
+    } catch (e) {
+        console.error(e);
+        alert('Ошибка при создании PDF');
+    } finally {
+        pdfBtn.disabled = false;
+        pdfBtn.innerHTML = originalText;
+        hideLoadingOverlay();
+    }
+}
+
+async function downloadCustomAsPNG() {
+    if (customCertificates.length === 0) return alert('Нет документов');
+
+    const pngBtn = document.getElementById('pngDownloadBtn');
+    const originalText = pngBtn.innerHTML;
+
+    pngBtn.disabled = true;
+    pngBtn.innerHTML = '⏳ Создание ZIP...';
+    showLoadingOverlay(`Создание PNG (${customCertificates.length} файлов)...`);
+
+    try {
+        const zip = new JSZip();
+
+        for (let i = 0; i < customCertificates.length; i++) {
+            updateProgressDetail(`Файл ${i+1} из ${customCertificates.length}...`);
+            const canvas = await renderCertificateToCanvasFixed(customCertificates[i], true);
+            const dataUrl = canvas.toDataURL('image/png').split(',')[1];
+            const name = customCertificates[i].name.replace(/[^а-яА-Яa-zA-Z0-9]/g, '_');
+            zip.file(`${name}_документ.png`, dataUrl, {base64: true});
+        }
+
+        const blob = await zip.generateAsync({type: "blob"});
+        const link = document.createElement('a');
+        link.href = URL.createObjectURL(blob);
+        link.download = `Документы_${new Date().toISOString().slice(0,10)}.zip`;
+        link.click();
+    } catch (e) {
+        console.error(e);
+        alert('Ошибка при создании PNG');
+    } finally {
+        pngBtn.disabled = false;
+        pngBtn.innerHTML = originalText;
+        hideLoadingOverlay();
+    }
+}
+
+// ====================== ОТРИСОВКА НА ЭКРАНЕ ======================
 function renderCertificates() {
     if (certificates.length === 0) {
-        container.innerHTML = `<div class="empty-message">Заполните списки имён и нажмите «Создать сертификаты»</div>`;
-        counterSpan.textContent = `Сертификатов: 0`;
+        if (!document.getElementById('tab-custom') || !document.getElementById('tab-custom').classList.contains('active')) {
+            container.innerHTML = `<div class="empty-message">Заполните списки имён и нажмите «Создать документы»</div>`;
+        }
+        if (counterSpan) counterSpan.textContent = `Документов: 0`;
         return;
     }
 
     let html = '';
     certificates.forEach(cert => {
         html += `
-            <div class="cert-page" data-id="${cert.id}">
+            <div class="cert-page" data-id="${cert.id}" data-type="template">
                 ${generateCertHTML(cert.name, cert.type)}
                 <div class="delete-btn-wrapper">
-                    <button class="delete-cert-btn" data-id="${cert.id}">✖ Удалить сертификат</button>
+                    <button class="delete-cert-btn" data-id="${cert.id}" data-type="template">✖ Удалить сертификат</button>
                 </div>
             </div>`;
     });
 
     container.innerHTML = html;
-    counterSpan.textContent = `Сертификатов: ${certificates.length}`;
+    if (counterSpan) counterSpan.textContent = `Документов: ${certificates.length}`;
 
-    container.querySelectorAll('.delete-cert-btn').forEach(btn => {
+    document.querySelectorAll('.delete-cert-btn[data-type="template"]').forEach(btn => {
         btn.removeEventListener('click', handleDelete);
         btn.addEventListener('click', handleDelete);
     });
@@ -640,11 +670,50 @@ function handleDelete(e) {
     if (id) {
         certificates = certificates.filter(c => c.id !== id);
         renderCertificates();
+        saveInputData();
     }
 }
 
-// ОБРАБОТЧИКИ
-document.getElementById('generateBtn').addEventListener('click', () => {
+function renderCustomCertificates() {
+    if (customCertificates.length === 0) {
+        if (document.getElementById('tab-custom') && document.getElementById('tab-custom').classList.contains('active')) {
+            container.innerHTML = `<div class="empty-message">Введите имена и нажмите «Создать документы»</div>`;
+        }
+        if (customCounterSpan) customCounterSpan.textContent = `Документов: 0`;
+        return;
+    }
+
+    let html = '';
+    customCertificates.forEach(cert => {
+        html += `
+            <div class="cert-page" data-id="${cert.id}" data-type="custom">
+                ${generateCustomCertHTML(cert.name, false)}
+                <div class="delete-btn-wrapper">
+                    <button class="delete-cert-btn" data-id="${cert.id}" data-type="custom">✖ Удалить документ</button>
+                </div>
+            </div>`;
+    });
+
+    container.innerHTML = html;
+    if (customCounterSpan) customCounterSpan.textContent = `Документов: ${customCertificates.length}`;
+
+    document.querySelectorAll('.delete-cert-btn[data-type="custom"]').forEach(btn => {
+        btn.removeEventListener('click', handleCustomDelete);
+        btn.addEventListener('click', handleCustomDelete);
+    });
+}
+
+function handleCustomDelete(e) {
+    const id = parseInt(e.target.getAttribute('data-id'));
+    if (id) {
+        customCertificates = customCertificates.filter(c => c.id !== id);
+        renderCustomCertificates();
+        saveCustomInputData();
+    }
+}
+
+// ====================== ОБРАБОТЧИКИ ======================
+document.getElementById('generateBtn')?.addEventListener('click', () => {
     const mka5Names = document.getElementById('listMka5').value.split(/\r?\n/).filter(n => n.trim());
     const mka3Names = document.getElementById('listMka3').value.split(/\r?\n/).filter(n => n.trim());
     const firstNames = document.getElementById('listFirstStep').value.split(/\r?\n/).filter(n => n.trim());
@@ -669,20 +738,20 @@ document.getElementById('generateBtn').addEventListener('click', () => {
     saveInputData();
 });
 
-document.getElementById('sampleBtn').addEventListener('click', () => {
+document.getElementById('sampleBtn')?.addEventListener('click', () => {
     document.getElementById('listMka5').value = "Екатерина Атомонова";
     document.getElementById('listMka3').value = "Алексей Викторов";
-    document.getElementById('listFirstStep').value = "Максим Дубровин";
+    document.getElementById('listFirstStep').value = "София Крамер";
     if (document.getElementById('listStriving')) {
-        document.getElementById('listStriving').value = "София Крамер";
+        document.getElementById('listStriving').value = "Иван Смирнов";
     }
     if (document.getElementById('listThankyou')) {
-        document.getElementById('listThankyou').value = "Анна Коваленко";
+        document.getElementById('listThankyou').value = "Дмитрий Орлов";
     }
     saveInputData();
 });
 
-document.getElementById('clearAllBtn').addEventListener('click', () => {
+document.getElementById('clearAllBtn')?.addEventListener('click', () => {
     if (confirm('Удалить все документы и очистить сохранённые данные?')) {
         certificates = [];
         renderCertificates();
@@ -695,13 +764,118 @@ document.getElementById('clearAllBtn').addEventListener('click', () => {
     }
 });
 
-// Назначение кнопок скачивания
-document.getElementById('pdfDownloadBtn').addEventListener('click', downloadAsPDF);
-document.getElementById('pngDownloadBtn').addEventListener('click', downloadAsPNG);
+document.getElementById('generateCustomBtn')?.addEventListener('click', () => {
+    const names = document.getElementById('listCustom').value.split(/\r?\n/).filter(n => n.trim());
+    if (names.length === 0) {
+        alert('Введите хотя бы одно имя');
+        return;
+    }
+    
+    customCertificates = [];
+    customNextId = 1;
+    names.forEach(name => customCertificates.push({id: customNextId++, name: name.trim()}));
+    
+    renderCustomCertificates();
+    saveCustomInputData();
+});
 
-// Загружаем сохранённые данные и настраиваем автосохранение
+document.getElementById('sampleCustomBtn')?.addEventListener('click', () => {
+    document.getElementById('listCustom').value = "Иван Петров\nМария Сидорова\nАлексей Иванов";
+    saveCustomInputData();
+});
+
+document.getElementById('clearCustomBtn')?.addEventListener('click', () => {
+    if (confirm('Очистить все документы?')) {
+        customCertificates = [];
+        renderCustomCertificates();
+        document.getElementById('listCustom').value = '';
+        saveCustomInputData();
+    }
+});
+
+// ====================== ВКЛАДКИ И ПРЕВЬЮ ======================
+function initTabs() {
+    const tabBtns = document.querySelectorAll('.tab-btn');
+    const tabContents = document.querySelectorAll('.tab-content');
+    
+    tabBtns.forEach(btn => {
+        btn.addEventListener('click', () => {
+            const tabId = btn.getAttribute('data-tab');
+            tabBtns.forEach(b => b.classList.remove('active'));
+            tabContents.forEach(c => c.classList.remove('active'));
+            btn.classList.add('active');
+            document.getElementById(`tab-${tabId}`).classList.add('active');
+            
+            if (tabId === 'templates') {
+                renderCertificates();
+                if (counterSpan) counterSpan.textContent = `Документов: ${certificates.length}`;
+            } else {
+                updatePreview();
+                renderCustomCertificates();
+                if (customCounterSpan) customCounterSpan.textContent = `Документов: ${customCertificates.length}`;
+            }
+        });
+    });
+}
+
+function initCustomTab() {
+    document.querySelectorAll('.bg-preview').forEach(el => {
+        el.addEventListener('click', () => {
+            document.querySelectorAll('.bg-preview').forEach(p => p.classList.remove('selected'));
+            el.classList.add('selected');
+            selectedBg = el.getAttribute('data-bg');
+            updatePreview();
+            saveCustomInputData();
+        });
+    });
+    
+    const customFields = ['customTitle', 'customAwarded', 'customDescription', 'customDescription2', 'listCustom', 'directorName', 'directorTitle'];
+    customFields.forEach(fieldId => {
+        const field = document.getElementById(fieldId);
+        if (field) field.addEventListener('input', () => {
+            updatePreview();
+            saveCustomInputData();
+        });
+    });
+}
+
+function initDownloadButtons() {
+    const pdfBtn = document.getElementById('pdfDownloadBtn');
+    const pngBtn = document.getElementById('pngDownloadBtn');
+    const pdfCustomBtn = document.getElementById('pdfCustomDownloadBtn');
+    const pngCustomBtn = document.getElementById('pngCustomDownloadBtn');
+    
+    if (pdfBtn) {
+        pdfBtn.addEventListener('click', () => {
+            downloadAsPDF();
+        });
+    }
+    
+    if (pngBtn) {
+        pngBtn.addEventListener('click', () => {
+            downloadAsPNG();
+        });
+    }
+    
+    if (pdfCustomBtn) {
+        pdfCustomBtn.addEventListener('click', () => {
+            downloadCustomAsPDF();
+        });
+    }
+    
+    if (pngCustomBtn) {
+        pngCustomBtn.addEventListener('click', () => {
+            downloadCustomAsPNG();
+        });
+    }
+}
+
+// ====================== ИНИЦИАЛИЗАЦИЯ ======================
 loadInputData();
+loadCustomInputData();
 setupAutoSave();
-
-// Инициализация
+initCustomTab();
+initTabs();
+initDownloadButtons();
 renderCertificates();
+updatePreview();ы

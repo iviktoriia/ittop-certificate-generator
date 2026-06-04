@@ -14,44 +14,99 @@
 <body>
 
 <div class="admin-panel">
-    <div class="admin-title">📜 Генератор сертификатов</div>
-    <div class="double-lists">
-        <div class="list-card">
-            <h3>🎓 Программа «МКА5»</h3>
-            <textarea id="listMka5" rows="5" placeholder="Введите имена (каждое с новой строки)"></textarea>
+    <div class="admin-title">📜 Генератор документов</div>
+    
+    <div class="tabs">
+        <button class="tab-btn active" data-tab="templates">📋 Готовые шаблоны</button>
+        <button class="tab-btn" data-tab="custom">🎨 Свой дизайн</button>
+    </div>
+    
+    <div id="tab-templates" class="tab-content active">
+        <div class="double-lists">
+            <div class="list-card">
+                <h3>🎓 Программа «МКА5»</h3>
+                <textarea id="listMka5" rows="3" placeholder="Введите имена (каждое с новой строки)"></textarea>
+            </div>
+            <div class="list-card">
+                <h3>🎓 Программа «МКА3»</h3>
+                <textarea id="listMka3" rows="3" placeholder="Введите имена (каждое с новой строки)"></textarea>
+            </div>
+            <div class="list-card">
+                <h3>🌟 Программа «Первый Шаг»</h3>
+                <textarea id="listFirstStep" rows="3" placeholder="Введите имена (каждое с новой строки)"></textarea>
+            </div>
+            <div class="list-card">
+                <h3>⭐ За стремление к IT-знаниям</h3>
+                <textarea id="listStriving" rows="3" placeholder="Введите имена (каждое с новой строки)"></textarea>
+            </div>
+            <div class="list-card">
+                <h3>💌 Благодарственное письмо</h3>
+                <textarea id="listThankyou" rows="3" placeholder="Введите имена детей (каждое с новой строки)"></textarea>
+            </div>
         </div>
-        <div class="list-card">
-            <h3>🎓 Программа «МКА3»</h3>
-            <textarea id="listMka3" rows="5" placeholder="Введите имена (каждое с новой строки)"></textarea>
-        </div>
-        <div class="list-card">
-            <h3>🌟 Программа «Первый Шаг»</h3>
-            <textarea id="listFirstStep" rows="5" placeholder="Введите имена (каждое с новой строки)"></textarea>
-        </div>
-        <div class="list-card">
-            <h3>⭐ За стремление к IT-знаниям</h3>
-            <textarea id="listStriving" rows="3" placeholder="Введите имена (каждое с новой строки)"></textarea>
-        </div>
-        <div class="list-card">
-            <h3>💌 Благодарственное письмо</h3>
-            <textarea id="listThankyou" rows="3" placeholder="Введите имена детей (каждое с новой строки)"></textarea>
+        <div class="action-bar">
+            <div class="btn-group">
+                <button class="btn btn-primary" id="generateBtn">✨ Создать документы</button>
+                <button class="btn btn-outline" id="sampleBtn">📋 Пример имён</button>
+                <button class="btn btn-outline" id="clearAllBtn">🗑 Очистить всё</button>
+                <button class="btn btn-outline" id="pdfDownloadBtn">📥 Скачать PDF</button>
+                <button class="btn btn-outline" id="pngDownloadBtn">📥 PNG (ZIP)</button>
+            </div>
+            <div class="counter" id="counterDisplay">Документов: 0</div>
         </div>
     </div>
-
-    <div class="action-bar">
-        <div style="display:flex; gap:10px; flex-wrap:wrap;">
-            <button class="btn btn-primary" id="generateBtn">✨ Создать сертификаты</button>
-            <button class="btn btn-outline" id="sampleBtn">📋 Пример имён</button>
-            <button class="btn btn-outline" id="clearAllBtn">🗑 Очистить всё</button>
-            <button class="btn btn-outline" id="pdfDownloadBtn">📥 Скачать PDF</button>
-            <button class="btn btn-outline" id="pngDownloadBtn">📥 PNG (ZIP)</button>
+    
+    <div id="tab-custom" class="tab-content">
+        <div class="custom-layout">
+            <div class="list-card bg-selection-card">
+                <h3>🎨 Выбор фона</h3>
+                <div class="bg-preview-list">
+                    <div class="bg-preview" data-bg="custom_bg_1.png" style="background-image: url('custom_bg_1.png');"></div>
+                    <div class="bg-preview" data-bg="custom_bg_2.png" style="background-image: url('custom_bg_2.png');"></div>
+                    <div class="bg-preview" data-bg="custom_bg_3.png" style="background-image: url('custom_bg_3.png');"></div>
+                </div>
+            </div>
+            <div class="list-card text-editor-card">
+                <h3>✏️ Текст грамоты</h3>
+                <input type="text" id="customTitle" value="ПОЧЁТНАЯ ГРАМОТА" placeholder="Заголовок" class="custom-input">
+                <input type="text" id="customAwarded" value="вручается" placeholder="Текст перед именем" class="custom-input">
+                <textarea id="customDescription" rows="4" placeholder="Основное описание" class="custom-input"></textarea>
+                <textarea id="customDescription2" rows="4" placeholder="Дополнительное описание" class="custom-input">Администрация Компьютерной Академии ТОП выражает искреннюю благодарность за высокий уровень профессионализма, ответственное отношение к образовательному процессу и значительный вклад в развитие учебной деятельности филиала.</textarea>
+                <div class="director-fields">
+                    <label>ФИО директора:</label>
+                    <input type="text" id="directorName" value="Горбунова Наталья" class="custom-input">
+                    <label>Должность:</label>
+                    <input type="text" id="directorTitle" value="Директор" class="custom-input">
+                </div>
+            </div>
         </div>
-        <div class="counter" id="counterDisplay">Сертификатов: 0</div>
+        
+        <div class="list-card preview-card">
+            <h3>👁️ Предпросмотр</h3>
+            <div class="preview-scroll">
+                <div id="customPreview" class="certificate-preview-a4"></div>
+            </div>
+        </div>
+        
+        <div class="list-card names-card">
+            <h3>📝 Список имён</h3>
+            <textarea id="listCustom" rows="4" placeholder="Введите имена (каждое с новой строки)" class="custom-input"></textarea>
+        </div>
+        <div class="action-bar">
+            <div class="btn-group">
+                <button class="btn btn-primary" id="generateCustomBtn">✨ Создать документы</button>
+                <button class="btn btn-outline" id="sampleCustomBtn">📋 Пример имён</button>
+                <button class="btn btn-outline" id="clearCustomBtn">🗑 Очистить</button>
+                <button class="btn btn-outline" id="pdfCustomDownloadBtn">📥 Скачать PDF</button>
+                <button class="btn btn-outline" id="pngCustomDownloadBtn">📥 PNG (ZIP)</button>
+            </div>
+            <div class="counter" id="customCounterDisplay">Документов: 0</div>
+        </div>
     </div>
 </div>
 
 <div id="certificatesContainer" class="certificates-container">
-    <div class="empty-message">Заполните списки имён и нажмите «Создать сертификаты»</div>
+    <div class="empty-message">Заполните списки имён и нажмите «Создать документы»</div>
 </div>
 
 <script src="script.js"></script>
