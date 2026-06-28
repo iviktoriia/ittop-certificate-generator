@@ -59,12 +59,13 @@ let nextId = 1;
 let customCertificates = [];
 let customNextId = 1;
 let selectedBg = 'custom_bg_1.png';
+let currentDocType = 'gramota';
 
 const container = document.getElementById('certificatesContainer');
 const counterSpan = document.getElementById('counterDisplay');
 const customCounterSpan = document.getElementById('customCounterDisplay');
 
-// ГЕНЕРАЦИЯ HTML
+// ====================== ГЕНЕРАЦИЯ HTML ======================
 function escapeHtml(str) {
     return str.replace(/[&<>]/g, m => m === '&' ? '&amp;' : m === '<' ? '&lt;' : '&gt;');
 }
@@ -180,14 +181,48 @@ function generateCertHTML(name, type) {
 }
 
 function getBackgroundStyle() {
-    if (selectedBg) {
-        return `background: url('${selectedBg}') no-repeat center center; background-size: cover;`;
+    const bg = document.querySelector('#gramota-settings .bg-preview.selected');
+    if (bg) {
+        const bgValue = bg.getAttribute('data-bg');
+        return `background: url('${bgValue}') no-repeat center center; background-size: cover;`;
     }
     return `background: url('custom_bg_1.png') no-repeat center center; background-size: cover;`;
 }
 
+function getDiplomaBgStyle() {
+    const bg = document.querySelector('#diploma-settings .bg-preview.selected');
+    if (bg) {
+        const bgValue = bg.getAttribute('data-bg');
+        return `background: url('${bgValue}') no-repeat center center; background-size: cover;`;
+    }
+    return `background: url('diploma_bg_1.png') no-repeat center center; background-size: cover;`;
+}
+
+function getAppendixBgStyle() {
+    const bg = document.querySelector('#appendix-settings .bg-preview.selected');
+    if (bg) {
+        const bgValue = bg.getAttribute('data-bg');
+        return `background: url('${bgValue}') no-repeat center center; background-size: cover;`;
+    }
+    return `background: url('appendix_bg_1.png') no-repeat center center; background-size: cover;`;
+}
+
 function generateCustomCertHTML(name, isPreview = false) {
-    const safeName = escapeHtml(name?.trim() || (isPreview ? 'Иванов Иван Иванович' : ''));
+    const safeName = escapeHtml(name?.trim() || (isPreview ? 'Иванов Иван' : ''));
+    const docType = currentDocType;
+    
+    if (docType === 'gramota') {
+        return generateGramotaHTML(name, isPreview);
+    } else if (docType === 'diploma') {
+        return generateDiplomaHTML(name, isPreview);
+    } else if (docType === 'appendix') {
+        return generateAppendixHTML(name, isPreview);
+    }
+    return '';
+}
+
+function generateGramotaHTML(name, isPreview = false) {
+    const safeName = escapeHtml(name?.trim() || (isPreview ? 'Иванов Иван' : ''));
     const year = new Date().getFullYear();
     const title = document.getElementById('customTitle')?.value || 'ПОЧЁТНАЯ ГРАМОТА';
     const awardedText = document.getElementById('customAwarded')?.value || 'вручается';
@@ -199,8 +234,10 @@ function generateCustomCertHTML(name, isPreview = false) {
     
     const signatureHtml = `<div class="custom-signature-img"><img src="signature.png" alt="Подпись" style="max-height: 100px;"></div>`;
     
+    const previewClass = isPreview ? 'preview-cert' : '';
+    
     return `
-        <div class="certificate cert-custom" style="${bgStyle} color: #1e1a2f;">
+        <div class="certificate cert-custom ${previewClass}" style="${bgStyle} color: #1e1a2f;">
             <div class="cert-logo">${BLACK_LOGO_SVG}</div>
             <div class="cert-content">
                 <div class="cert-title" style="color: #1e1a2f;">${escapeHtml(title)}</div>
@@ -222,6 +259,94 @@ function generateCustomCertHTML(name, isPreview = false) {
         </div>`;
 }
 
+function generateDiplomaHTML(name, isPreview = false) {
+    const safeName = escapeHtml(name?.trim() || (isPreview ? 'Иванов Иван' : ''));
+    const title = document.getElementById('diplomaTitle')?.value || 'ДИПЛОМ';
+    const subtitle = document.getElementById('diplomaSubtitle')?.value || 'Малой Компьютерной Академии ТОП';
+    const diplomaNumber = document.getElementById('diplomaNumber')?.value || '0000001';
+    const dateFrom = document.getElementById('diplomaDateFrom')?.value || '01.09.2024';
+    const dateTo = document.getElementById('diplomaDateTo')?.value || '31.05.2025';
+    const program = document.getElementById('diplomaProgram')?.value || 'Малой Компьютерной Академии ТОП';
+    const periodText = document.getElementById('diplomaPeriodText')?.value || 'прошел обучение по программе';
+    const city = document.getElementById('diplomaCity')?.value || 'Москва';
+    const diplomaYear = document.getElementById('diplomaYear')?.value || '2025';
+    const directorName = document.getElementById('diplomaDirectorName')?.value || 'Горбунова Н.А.';
+    const directorTitle = document.getElementById('diplomaDirectorTitle')?.value || 'Директор Компьютерной Академии ТОП';
+    const bgStyle = getDiplomaBgStyle();
+    
+    const signatureHtml = `<div class="diploma-signature-img"><img src="signature.png" alt="Подпись" style="max-height: 80px;"></div>`;
+    const previewClass = isPreview ? 'preview-cert' : '';
+    
+    return `
+        <div class="certificate cert-diploma ${previewClass}" style="${bgStyle} color: #1e1a2f;">
+            <div class="cert-content">
+                <div class="cert-title" style="color: #1e1a2f;">${escapeHtml(title)}</div>
+                <div class="diploma-subtitle" style="color: #1e1a2f;">${escapeHtml(subtitle)}</div>
+                <div class="diploma-number" style="color: #1e1a2f;">№ ${escapeHtml(diplomaNumber)}</div>
+                <div class="recipient-name" style="color: #1e1a2f;">${safeName}</div>
+                <div class="name-underline"></div>
+                <div class="diploma-period" style="color: #1e1a2f;">с ${escapeHtml(dateFrom)} по ${escapeHtml(dateTo)} ${escapeHtml(periodText)}</div>
+                <div class="diploma-program" style="color: #1e1a2f;">${escapeHtml(program)}</div>
+            </div>
+            <div class="diploma-footer">
+                <div class="diploma-signature-block">
+                    ${signatureHtml}
+                    <div class="diploma-signature-line"></div>
+                    <div class="diploma-director-name" style="color: #1e1a2f;">${escapeHtml(directorName)}</div>
+                    <div class="diploma-director-title" style="color: #1e1a2f;">${escapeHtml(directorTitle)}</div>
+                    <div class="diploma-city-year" style="color: #1e1a2f;">${escapeHtml(city)}, ${escapeHtml(diplomaYear)}</div>
+                </div>
+            </div>
+        </div>`;
+}
+
+function generateAppendixHTML(name, isPreview = false) {
+    const safeName = escapeHtml(name?.trim() || (isPreview ? 'Иванов Иван' : ''));
+    const title = document.getElementById('appendixTitle')?.value || 'Приложение к диплому';
+    const appendixNumber = document.getElementById('appendixNumber')?.value || '0000001';
+    const dateFrom = document.getElementById('appendixDateFrom')?.value || '01.09.2024';
+    const dateTo = document.getElementById('appendixDateTo')?.value || '31.05.2025';
+    const program = document.getElementById('appendixProgram')?.value || 'Малой Компьютерной Академии ТОП';
+    const periodText = document.getElementById('appendixPeriodText')?.value || 'прошел обучение по программе';
+    const subjectsTitle = document.getElementById('appendixSubjectsTitle')?.value || 'За время обучения сдал экзамены и зачеты по следующим дисциплинам:';
+    const subjectsText = document.getElementById('appendixSubjects')?.value || '';
+    const bgStyle = getAppendixBgStyle();
+    
+    let subjectsHtml = '';
+    if (subjectsText) {
+        const rows = subjectsText.split('\n').filter(r => r.trim());
+        if (rows.length > 0) {
+            subjectsHtml = `<table>`;
+            rows.forEach(row => {
+                const parts = row.split(',').map(p => p.trim());
+                if (parts.length >= 3) {
+                    subjectsHtml += `<tr>
+                        <td class="subject-name">${escapeHtml(parts[0])}</td>
+                        <td class="subject-grade">${escapeHtml(parts[1])}</td>
+                        <td class="subject-grade-word">${escapeHtml(parts[2])}</td>
+                    </tr>`;
+                }
+            });
+            subjectsHtml += `</table>`;
+        }
+    }
+    
+    const previewClass = isPreview ? 'preview-cert' : '';
+    
+    return `
+        <div class="certificate cert-appendix ${previewClass}" style="${bgStyle} color: #1e1a2f;">
+            <div class="cert-content">
+                <div class="appendix-title" style="color: #1e1a2f;">${escapeHtml(title)} № ${escapeHtml(appendixNumber)}</div>
+                <div class="appendix-name" style="color: #1e1a2f;">${safeName}</div>
+                <div class="name-underline"></div>
+                <div class="appendix-period" style="color: #1e1a2f;">с ${escapeHtml(dateFrom)} по ${escapeHtml(dateTo)} ${escapeHtml(periodText)}</div>
+                <div class="appendix-program" style="color: #1e1a2f;">${escapeHtml(program)}</div>
+                <div class="appendix-subjects-title" style="color: #1e1a2f;">${escapeHtml(subjectsTitle)}</div>
+                <div class="appendix-subjects" style="color: #1e1a2f;">${subjectsHtml}</div>
+            </div>
+        </div>`;
+}
+
 function updatePreview() {
     const previewContainer = document.getElementById('customPreview');
     if (previewContainer) {
@@ -229,7 +354,7 @@ function updatePreview() {
     }
 }
 
-// СОХРАНЕНИЕ ДАННЫХ
+// ====================== СОХРАНЕНИЕ ДАННЫХ ======================
 function saveInputData() {
     const mka5Value = document.getElementById('listMka5')?.value || '';
     const mka3Value = document.getElementById('listMka3')?.value || '';
@@ -263,53 +388,99 @@ function loadInputData() {
 }
 
 function saveCustomInputData() {
-    const customNames = document.getElementById('listCustom')?.value || '';
-    const customTitle = document.getElementById('customTitle')?.value || '';
-    const customAwarded = document.getElementById('customAwarded')?.value || '';
-    const customDescription = document.getElementById('customDescription')?.value || '';
-    const customDescription2 = document.getElementById('customDescription2')?.value || '';
-    const directorName = document.getElementById('directorName')?.value || '';
-    const directorTitle = document.getElementById('directorTitle')?.value || '';
+    const values = {
+        custom_names: document.getElementById('listCustom')?.value || '',
+        custom_title: document.getElementById('customTitle')?.value || '',
+        custom_awarded: document.getElementById('customAwarded')?.value || '',
+        custom_description: document.getElementById('customDescription')?.value || '',
+        custom_description2: document.getElementById('customDescription2')?.value || '',
+        custom_directorName: document.getElementById('directorName')?.value || '',
+        custom_directorTitle: document.getElementById('directorTitle')?.value || '',
+        custom_docType: currentDocType,
+        diploma_title: document.getElementById('diplomaTitle')?.value || '',
+        diploma_subtitle: document.getElementById('diplomaSubtitle')?.value || '',
+        diploma_number: document.getElementById('diplomaNumber')?.value || '',
+        diploma_dateFrom: document.getElementById('diplomaDateFrom')?.value || '',
+        diploma_dateTo: document.getElementById('diplomaDateTo')?.value || '',
+        diploma_program: document.getElementById('diplomaProgram')?.value || '',
+        diploma_periodText: document.getElementById('diplomaPeriodText')?.value || '',
+        diploma_city: document.getElementById('diplomaCity')?.value || '',
+        diploma_year: document.getElementById('diplomaYear')?.value || '',
+        diploma_directorName: document.getElementById('diplomaDirectorName')?.value || '',
+        diploma_directorTitle: document.getElementById('diplomaDirectorTitle')?.value || '',
+        appendix_title: document.getElementById('appendixTitle')?.value || '',
+        appendix_number: document.getElementById('appendixNumber')?.value || '',
+        appendix_dateFrom: document.getElementById('appendixDateFrom')?.value || '',
+        appendix_dateTo: document.getElementById('appendixDateTo')?.value || '',
+        appendix_program: document.getElementById('appendixProgram')?.value || '',
+        appendix_periodText: document.getElementById('appendixPeriodText')?.value || '',
+        appendix_subjectsTitle: document.getElementById('appendixSubjectsTitle')?.value || '',
+        appendix_subjects: document.getElementById('appendixSubjects')?.value || ''
+    };
     
-    localStorage.setItem('custom_names', customNames);
-    localStorage.setItem('custom_title', customTitle);
-    localStorage.setItem('custom_awarded', customAwarded);
-    localStorage.setItem('custom_description', customDescription);
-    localStorage.setItem('custom_description2', customDescription2);
-    localStorage.setItem('custom_directorName', directorName);
-    localStorage.setItem('custom_directorTitle', directorTitle);
-    localStorage.setItem('custom_selectedBg', selectedBg);
+    Object.keys(values).forEach(key => {
+        localStorage.setItem(key, values[key]);
+    });
 }
 
 function loadCustomInputData() {
-    const savedNames = localStorage.getItem('custom_names');
-    const savedTitle = localStorage.getItem('custom_title');
-    const savedAwarded = localStorage.getItem('custom_awarded');
-    const savedDescription = localStorage.getItem('custom_description');
-    const savedDescription2 = localStorage.getItem('custom_description2');
-    const savedDirectorName = localStorage.getItem('custom_directorName');
-    const savedDirectorTitle = localStorage.getItem('custom_directorTitle');
-    const savedSelectedBg = localStorage.getItem('custom_selectedBg');
+    const fields = {
+        custom_names: 'listCustom',
+        custom_title: 'customTitle',
+        custom_awarded: 'customAwarded',
+        custom_description: 'customDescription',
+        custom_description2: 'customDescription2',
+        custom_directorName: 'directorName',
+        custom_directorTitle: 'directorTitle',
+        diploma_title: 'diplomaTitle',
+        diploma_subtitle: 'diplomaSubtitle',
+        diploma_number: 'diplomaNumber',
+        diploma_dateFrom: 'diplomaDateFrom',
+        diploma_dateTo: 'diplomaDateTo',
+        diploma_program: 'diplomaProgram',
+        diploma_periodText: 'diplomaPeriodText',
+        diploma_city: 'diplomaCity',
+        diploma_year: 'diplomaYear',
+        diploma_directorName: 'diplomaDirectorName',
+        diploma_directorTitle: 'diplomaDirectorTitle',
+        appendix_title: 'appendixTitle',
+        appendix_number: 'appendixNumber',
+        appendix_dateFrom: 'appendixDateFrom',
+        appendix_dateTo: 'appendixDateTo',
+        appendix_program: 'appendixProgram',
+        appendix_periodText: 'appendixPeriodText',
+        appendix_subjectsTitle: 'appendixSubjectsTitle',
+        appendix_subjects: 'appendixSubjects'
+    };
     
-    if (savedNames) document.getElementById('listCustom').value = savedNames;
-    if (savedTitle) document.getElementById('customTitle').value = savedTitle;
-    if (savedAwarded) document.getElementById('customAwarded').value = savedAwarded;
-    if (savedDescription) document.getElementById('customDescription').value = savedDescription;
-    if (savedDescription2) document.getElementById('customDescription2').value = savedDescription2;
-    if (savedDirectorName) document.getElementById('directorName').value = savedDirectorName;
-    if (savedDirectorTitle) document.getElementById('directorTitle').value = savedDirectorTitle;
-    if (savedSelectedBg) selectedBg = savedSelectedBg;
-    
-    updatePreview();
-    
-    document.querySelectorAll('.bg-preview').forEach(el => {
-        const bgValue = el.getAttribute('data-bg');
-        if (bgValue === selectedBg) {
-            el.classList.add('selected');
-        } else {
-            el.classList.remove('selected');
+    Object.keys(fields).forEach(key => {
+        const saved = localStorage.getItem(key);
+        const elId = fields[key];
+        if (saved && document.getElementById(elId)) {
+            document.getElementById(elId).value = saved;
         }
     });
+    
+    const savedDocType = localStorage.getItem('custom_docType');
+    if (savedDocType) {
+        currentDocType = savedDocType;
+        document.querySelectorAll('.doc-type-btn').forEach(b => {
+            b.classList.toggle('active', b.getAttribute('data-type') === savedDocType);
+        });
+        document.querySelectorAll('.doc-settings').forEach(s => {
+            s.classList.toggle('active', s.id === `${savedDocType}-settings`);
+        });
+    }
+    
+    // Выделение сохранённого фона для грамоты
+    const savedGramotaBg = localStorage.getItem('custom_selectedBg');
+    if (savedGramotaBg) {
+        document.querySelectorAll('#gramota-settings .bg-preview').forEach(el => {
+            el.classList.toggle('selected', el.getAttribute('data-bg') === savedGramotaBg);
+        });
+    }
+    
+    updatePreview();
 }
 
 function clearSavedData() {
@@ -321,14 +492,13 @@ function clearSavedData() {
 }
 
 function clearCustomSavedData() {
-    localStorage.removeItem('custom_names');
-    localStorage.removeItem('custom_title');
-    localStorage.removeItem('custom_awarded');
-    localStorage.removeItem('custom_description');
-    localStorage.removeItem('custom_description2');
-    localStorage.removeItem('custom_directorName');
-    localStorage.removeItem('custom_directorTitle');
-    localStorage.removeItem('custom_selectedBg');
+    const fields = ['custom_names', 'custom_title', 'custom_awarded', 'custom_description', 'custom_description2',
+        'custom_directorName', 'custom_directorTitle', 'custom_docType', 'custom_selectedBg',
+        'diploma_title', 'diploma_subtitle', 'diploma_number', 'diploma_dateFrom', 'diploma_dateTo',
+        'diploma_program', 'diploma_periodText', 'diploma_city', 'diploma_year', 'diploma_directorName',
+        'diploma_directorTitle', 'appendix_title', 'appendix_number', 'appendix_dateFrom', 'appendix_dateTo',
+        'appendix_program', 'appendix_periodText', 'appendix_subjectsTitle', 'appendix_subjects'];
+    fields.forEach(key => localStorage.removeItem(key));
 }
 
 function setupAutoSave() {
@@ -339,7 +509,7 @@ function setupAutoSave() {
     });
 }
 
-// ОВЕРЛЕЙ
+// ====================== ОВЕРЛЕЙ ======================
 function showLoadingOverlay(message = "Обработка...") {
     let overlay = document.getElementById('loadingOverlay');
     if (!overlay) {
@@ -373,7 +543,7 @@ function hideLoadingOverlay() {
     if (overlay) overlay.style.display = 'none';
 }
 
-// РЕНДЕР ЧЕРЕЗ IFrame
+// ====================== РЕНДЕР ЧЕРЕЗ IFrame ======================
 async function renderCertificateToCanvasFixed(certificateData, isCustom = false) {
     const iframe = document.createElement('iframe');
     iframe.style.position = 'fixed';
@@ -417,6 +587,71 @@ async function renderCertificateToCanvasFixed(certificateData, isCustom = false)
         .cert-mka3 { background: url('cert_mka3_bg.png') no-repeat center center; background-size: cover; color: white; }
         .cert-firststep { background: url('cert_firststep_bg.png') no-repeat center center; background-size: cover; color: black; }
         .cert-striving { background: url('cert_striving_bg.png') no-repeat center center; background-size: cover; color: black; }
+        
+        .cert-diploma {
+            width: 297mm;
+            height: 210mm;
+            padding: 50px 50px;
+            text-align: center;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            box-sizing: border-box;
+            background-size: cover !important;
+            background-position: center center !important;
+            background-repeat: no-repeat !important;
+            border: none;
+            outline: none;
+            margin: 0 auto;
+        }
+        .cert-diploma .cert-logo { display: none; }
+        .cert-diploma .cert-content { display: flex; flex-direction: column; justify-content: center; align-items: center; width: 100%; flex: 0 1 auto; }
+        .cert-diploma .cert-title { font-family: 'Playfair Display', serif; font-weight: 600; font-size: 60px; letter-spacing: 3px; margin: 0 0 10px 0 !important; text-transform: uppercase; }
+        .cert-diploma .diploma-subtitle { font-family: 'Nunito', sans-serif; font-size: 32px; font-weight: 600; margin-bottom: 15px; }
+        .cert-diploma .diploma-number { font-family: 'Nunito', sans-serif; font-size: 20px; font-weight: 400; margin-bottom: 15px; }
+        .cert-diploma .recipient-name { font-family: 'Caveat', cursive; color: #A71132 !important; font-weight: 400; font-size: 52px; margin: 0 !important; line-height: 1.2; word-break: break-word; max-width: 100%; }
+        .cert-diploma .name-underline { width: 85%; max-width: 500px; min-width: 240px; height: 2px; margin: 0 auto 25px auto; background: #1e1a2f; }
+        .cert-diploma .diploma-period { font-family: 'Nunito', sans-serif; font-size: 20px; font-weight: 400; margin-bottom: 10px; }
+        .cert-diploma .diploma-program { font-family: 'Nunito', sans-serif; font-size: 20px; font-weight: 400; margin-bottom: 25px; }
+        .cert-diploma .diploma-footer { display: flex; justify-content: center; flex-shrink: 0; }
+        .cert-diploma .diploma-signature-block { text-align: center; }
+        .cert-diploma .diploma-signature-img { margin-bottom: 5px; }
+        .cert-diploma .diploma-signature-img img { max-height: 80px; width: auto; }
+        .cert-diploma .diploma-signature-line { width: 100%; max-width: 300px; height: 1px; background: #1e1a2f; margin: 5px auto; }
+        .cert-diploma .diploma-director-name { font-family: 'Playfair Display', serif; font-size: 18px; font-weight: 400; }
+        .cert-diploma .diploma-director-title { font-size: 18px; font-weight: 400; font-family: 'Playfair Display', serif; }
+        .cert-diploma .diploma-city-year { font-family: 'Nunito', sans-serif; font-size: 20px; font-weight: 400; margin-top: 20px; }
+        
+        .cert-appendix {
+            width: 210mm;
+            height: 297mm;
+            padding: 70px 50px;
+            text-align: center;
+            display: flex;
+            flex-direction: column;
+            justify-content: flex-start;
+            box-sizing: border-box;
+            background-size: cover !important;
+            background-position: center center !important;
+            background-repeat: no-repeat !important;
+            border: none;
+            outline: none;
+        }
+        .cert-appendix .cert-logo { display: none; }
+        .cert-appendix .appendix-title { font-family: 'Nunito', sans-serif; font-weight: 400; font-style: italic; font-size: 32px; margin-bottom: 15px; }
+        .cert-appendix .appendix-number { font-family: 'Nunito', sans-serif; font-style: italic; font-size: 32px; font-weight: 400; margin-bottom: 10px; }
+        .cert-appendix .appendix-name { font-family: 'Caveat', cursive; color: #A71132 !important; font-weight: 400; font-size: 52px; line-height: 1.2; word-break: break-word; }
+        .cert-appendix .name-underline { width: 85%; max-width: 500px; min-width: 240px; height: 2px; margin-bottom: 25px; background: #1e1a2f; }
+        .cert-appendix .appendix-period { font-family: 'Nunito', sans-serif; font-size: 20px; font-weight: 400; margin-bottom: 2px; }
+        .cert-appendix .appendix-program { font-family: 'Nunito', sans-serif; font-size: 20px; font-weight: 400; margin-bottom: 25px; }
+        .cert-appendix .appendix-subjects-title { font-family: 'Nunito', sans-serif; font-size: 20px; font-weight: 400; margin-bottom: 10px; }
+        .cert-appendix .appendix-subjects { font-family: 'Nunito', sans-serif; font-size: 20px; font-weight: 400; line-height: 1.3; text-align: left; width: 100%; padding: 0 20px; }
+        .cert-appendix .appendix-subjects table { width: 100%; border-collapse: collapse; }
+        .cert-appendix .appendix-subjects td { padding: 0px 8px; }
+        .cert-appendix .appendix-subjects .subject-name { text-align: left; width: 70%; word-wrap: break-word; word-break: break-word; white-space: normal; max-width: 0; }
+        .cert-appendix .appendix-subjects .subject-grade { text-align: center; width: 10%; }
+        .cert-appendix .appendix-subjects .subject-grade-word { text-align: left; width: 20%; }
+        
         .cert-thankyou {
             background: url('cert_thankyou_bg.png') no-repeat center center;
             background-size: cover;
@@ -522,11 +757,11 @@ async function renderCertificateToCanvasFixed(certificateData, isCustom = false)
             font-weight: 400;
             font-family: 'Nunito', sans-serif;
         }
+        
         .cert-logo { margin-bottom: 15px; display: flex; justify-content: center; align-items: center; width: 100%; }
         .cert-logo svg { width: 160px; height: auto; display: block; }
         .cert-content { flex: 1; display: flex; flex-direction: column; justify-content: center; align-items: center; width: 100%; }
         
-        /* Стиль для заголовка в готовых шаблонах */
         .cert-mka5 .cert-title,
         .cert-mka3 .cert-title,
         .cert-firststep .cert-title,
@@ -540,7 +775,6 @@ async function renderCertificateToCanvasFixed(certificateData, isCustom = false)
             text-transform: uppercase;
         }
         
-        /* Стиль для заголовка в кастомном сертификате */
         .cert-custom .cert-title {
             font-family: 'Playfair Display', serif !important;
             font-weight: 400 !important;
@@ -635,37 +869,10 @@ async function renderCertificateToCanvasFixed(certificateData, isCustom = false)
     
     let certHtml;
     if (isCustom) {
-        const title = document.getElementById('customTitle')?.value || 'ПОЧЁТНАЯ ГРАМОТА';
-        const awardedText = document.getElementById('customAwarded')?.value || 'вручается';
-        const description = document.getElementById('customDescription')?.value || '';
-        const description2 = document.getElementById('customDescription2')?.value || 'Администрация Компьютерной Академии ТОП выражает искреннюю благодарность за высокий уровень профессионализма, ответственное отношение к образовательному процессу и значительный вклад в развитие учебной деятельности филиала.';
-        const directorName = document.getElementById('directorName')?.value || 'Горбунова Наталья';
-        const directorTitle = document.getElementById('directorTitle')?.value || 'Директор';
-        const bgStyle = getBackgroundStyle();
-        
-        const signatureHtml = `<div class="custom-signature-img"><img src="signature.png" alt="Подпись" style="max-height: 100px;"></div>`;
-        
-        certHtml = `
-            <div class="certificate cert-custom" style="${bgStyle} color: #1e1a2f;">
-                <div class="cert-logo">${BLACK_LOGO_SVG}</div>
-                <div class="cert-content">
-                    <div class="cert-title" style="color: #1e1a2f;">${escapeHtml(title)}</div>
-                    <div class="awarded-text" style="color: #1e1a2f;">${escapeHtml(awardedText)}</div>
-                    <div class="recipient-name" style="color: #1e1a2f;">${escapeHtml(certificateData.name)}</div>
-                    <div class="name-underline"></div>
-                    <div class="program-description" style="color: #1e1a2f;">${escapeHtml(description).replace(/\n/g, '<br>')}</div>
-                    <div class="program-description second-text" style="color: #1e1a2f;">${escapeHtml(description2).replace(/\n/g, '<br>')}</div>
-                </div>
-                <div class="custom-footer">
-                    <div class="custom-signature-block">
-                        ${signatureHtml}
-                        <div class="signature-line"></div>
-                        <div class="custom-director-name" style="color: #1e1a2f;">${escapeHtml(directorName)}</div>
-                        <div class="custom-director-title" style="color: #1e1a2f;">${escapeHtml(directorTitle)}</div>
-                    </div>
-                </div>
-                <div class="year-stamp" style="color: #1e1a2f;">${new Date().getFullYear()}</div>
-            </div>`;
+        const savedType = currentDocType;
+        currentDocType = certificateData.type || 'gramota';
+        certHtml = generateCustomCertHTML(certificateData.name, false);
+        currentDocType = savedType;
     } else {
         certHtml = generateCertHTML(certificateData.name, certificateData.type);
     }
@@ -693,7 +900,7 @@ async function renderCertificateToCanvasFixed(certificateData, isCustom = false)
     return canvas;
 }
 
-// PDF И PNG
+// ====================== PDF И PNG ======================
 async function downloadAsPDF() {
     if (certificates.length === 0) return alert('Нет сертификатов');
 
@@ -778,15 +985,41 @@ async function downloadCustomAsPDF() {
 
     try {
         const { jsPDF } = window.jspdf;
-        const pdf = new jsPDF({ orientation: 'portrait', unit: 'mm', format: 'a4' });
+        let pdf = null;
+        let isFirstPage = true;
 
         for (let i = 0; i < customCertificates.length; i++) {
-            if (i > 0) pdf.addPage();
+            const cert = customCertificates[i];
+            const isDiploma = cert.type === 'diploma';
+            
+            // Для диплома используем горизонтальный формат A4 (ландшафтный)
+            if (isDiploma) {
+                if (isFirstPage) {
+                    pdf = new jsPDF({ orientation: 'landscape', unit: 'mm', format: 'a4' });
+                    isFirstPage = false;
+                } else {
+                    pdf.addPage('a4', 'landscape');
+                }
+            } else {
+                if (isFirstPage) {
+                    pdf = new jsPDF({ orientation: 'portrait', unit: 'mm', format: 'a4' });
+                    isFirstPage = false;
+                } else {
+                    pdf.addPage('a4', 'portrait');
+                }
+            }
+            
             updateProgressDetail(`Страница ${i+1} из ${customCertificates.length}...`);
 
-            const canvas = await renderCertificateToCanvasFixed(customCertificates[i], true);
+            const canvas = await renderCertificateToCanvasFixed(cert, true);
             const imgData = canvas.toDataURL('image/png', 1.0);
-            pdf.addImage(imgData, 'PNG', 0, 0, 210, 297);
+            
+            if (isDiploma) {
+                // Для диплома размеры страницы 297x210 (горизонтальный A4)
+                pdf.addImage(imgData, 'PNG', 0, 0, 297, 210);
+            } else {
+                pdf.addImage(imgData, 'PNG', 0, 0, 210, 297);
+            }
         }
 
         pdf.save(`Документы_${new Date().toISOString().slice(0,10)}.pdf`);
@@ -818,7 +1051,9 @@ async function downloadCustomAsPNG() {
             const canvas = await renderCertificateToCanvasFixed(customCertificates[i], true);
             const dataUrl = canvas.toDataURL('image/png').split(',')[1];
             const name = customCertificates[i].name.replace(/[^а-яА-Яa-zA-Z0-9]/g, '_');
-            zip.file(`${name}_документ.png`, dataUrl, {base64: true});
+            const typeName = customCertificates[i].type === 'diploma' ? 'диплом' : 
+                            (customCertificates[i].type === 'appendix' ? 'приложение' : 'документ');
+            zip.file(`${name}_${typeName}.png`, dataUrl, {base64: true});
         }
 
         const blob = await zip.generateAsync({type: "blob"});
@@ -836,7 +1071,7 @@ async function downloadCustomAsPNG() {
     }
 }
 
-// ОТРИСОВКА НА ЭКРАНЕ
+// ====================== ОТРИСОВКА НА ЭКРАНЕ ======================
 function renderCertificates() {
     if (certificates.length === 0) {
         if (!document.getElementById('tab-custom') || !document.getElementById('tab-custom').classList.contains('active')) {
@@ -886,9 +1121,16 @@ function renderCustomCertificates() {
 
     let html = '';
     customCertificates.forEach(cert => {
+        const savedType = currentDocType;
+        currentDocType = cert.type || 'gramota';
+        const certHtml = generateCustomCertHTML(cert.name, false);
+        currentDocType = savedType;
+        
+        const isDiploma = cert.type === 'diploma';
+        
         html += `
-            <div class="cert-page" data-id="${cert.id}" data-type="custom">
-                ${generateCustomCertHTML(cert.name, false)}
+            <div class="cert-page" data-id="${cert.id}" data-type="custom" ${isDiploma ? 'style="width: 297mm; min-width: 297mm; max-width: 297mm;"' : ''}>
+                ${certHtml}
                 <div class="delete-btn-wrapper">
                     <button class="delete-cert-btn" data-id="${cert.id}" data-type="custom">✖ Удалить документ</button>
                 </div>
@@ -913,7 +1155,7 @@ function handleCustomDelete(e) {
     }
 }
 
-// ОБРАБОТЧИКИ
+// ====================== ОБРАБОТЧИКИ ======================
 document.getElementById('generateBtn')?.addEventListener('click', () => {
     const mka5Names = document.getElementById('listMka5').value.split(/\r?\n/).filter(n => n.trim());
     const mka3Names = document.getElementById('listMka3').value.split(/\r?\n/).filter(n => n.trim());
@@ -974,7 +1216,11 @@ document.getElementById('generateCustomBtn')?.addEventListener('click', () => {
     
     customCertificates = [];
     customNextId = 1;
-    names.forEach(name => customCertificates.push({id: customNextId++, name: name.trim()}));
+    names.forEach(name => customCertificates.push({
+        id: customNextId++, 
+        name: name.trim(), 
+        type: currentDocType
+    }));
     
     renderCustomCertificates();
     saveCustomInputData();
@@ -994,7 +1240,7 @@ document.getElementById('clearCustomBtn')?.addEventListener('click', () => {
     }
 });
 
-// ВКЛАДКИ И ПРЕВЬЮ
+// ====================== ВКЛАДКИ И ПРЕВЬЮ ======================
 function initTabs() {
     const tabBtns = document.querySelectorAll('.tab-btn');
     const tabContents = document.querySelectorAll('.tab-content');
@@ -1020,17 +1266,56 @@ function initTabs() {
 }
 
 function initCustomTab() {
-    document.querySelectorAll('.bg-preview').forEach(el => {
-        el.addEventListener('click', () => {
-            document.querySelectorAll('.bg-preview').forEach(p => p.classList.remove('selected'));
-            el.classList.add('selected');
-            selectedBg = el.getAttribute('data-bg');
+    document.querySelectorAll('.doc-type-btn').forEach(btn => {
+        btn.addEventListener('click', () => {
+            document.querySelectorAll('.doc-type-btn').forEach(b => b.classList.remove('active'));
+            btn.classList.add('active');
+            currentDocType = btn.getAttribute('data-type');
+            document.querySelectorAll('.doc-settings').forEach(s => s.classList.remove('active'));
+            const settingsEl = document.getElementById(`${currentDocType}-settings`);
+            if (settingsEl) settingsEl.classList.add('active');
             updatePreview();
             saveCustomInputData();
         });
     });
     
-    const customFields = ['customTitle', 'customAwarded', 'customDescription', 'customDescription2', 'listCustom', 'directorName', 'directorTitle'];
+    document.querySelectorAll('#gramota-settings .bg-preview').forEach(el => {
+        el.addEventListener('click', () => {
+            document.querySelectorAll('#gramota-settings .bg-preview').forEach(p => p.classList.remove('selected'));
+            el.classList.add('selected');
+            localStorage.setItem('custom_selectedBg', el.getAttribute('data-bg'));
+            updatePreview();
+            saveCustomInputData();
+        });
+    });
+    
+    document.querySelectorAll('#diploma-settings .bg-preview').forEach(el => {
+        el.addEventListener('click', () => {
+            document.querySelectorAll('#diploma-settings .bg-preview').forEach(p => p.classList.remove('selected'));
+            el.classList.add('selected');
+            updatePreview();
+            saveCustomInputData();
+        });
+    });
+    
+    document.querySelectorAll('#appendix-settings .bg-preview').forEach(el => {
+        el.addEventListener('click', () => {
+            document.querySelectorAll('#appendix-settings .bg-preview').forEach(p => p.classList.remove('selected'));
+            el.classList.add('selected');
+            updatePreview();
+            saveCustomInputData();
+        });
+    });
+    
+    const customFields = [
+        'customTitle', 'customAwarded', 'customDescription', 'customDescription2', 
+        'directorName', 'directorTitle', 'listCustom',
+        'diplomaTitle', 'diplomaSubtitle', 'diplomaNumber', 'diplomaDateFrom', 
+        'diplomaDateTo', 'diplomaProgram', 'diplomaPeriodText',
+        'diplomaCity', 'diplomaYear', 'diplomaDirectorName', 'diplomaDirectorTitle',
+        'appendixTitle', 'appendixNumber', 'appendixDateFrom', 'appendixDateTo', 
+        'appendixProgram', 'appendixPeriodText', 'appendixSubjectsTitle', 'appendixSubjects'
+    ];
     customFields.forEach(fieldId => {
         const field = document.getElementById(fieldId);
         if (field) field.addEventListener('input', () => {
@@ -1071,7 +1356,7 @@ function initDownloadButtons() {
     }
 }
 
-// ИНИЦИАЛИЗАЦИЯ
+// ====================== ИНИЦИАЛИЗАЦИЯ ======================
 loadInputData();
 loadCustomInputData();
 setupAutoSave();

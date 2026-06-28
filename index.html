@@ -57,26 +57,100 @@
     </div>
     
     <div id="tab-custom" class="tab-content">
-        <div class="custom-layout">
-            <div class="list-card bg-selection-card">
-                <h3>🎨 Выбор фона</h3>
-                <div class="bg-preview-list">
-                    <div class="bg-preview" data-bg="custom_bg_1.png" style="background-image: url('custom_bg_1.png');"></div>
-                    <div class="bg-preview" data-bg="custom_bg_2.png" style="background-image: url('custom_bg_2.png');"></div>
-                    <div class="bg-preview" data-bg="custom_bg_3.png" style="background-image: url('custom_bg_3.png');"></div>
+        <!-- Выбор типа документа -->
+        <div class="list-card" style="margin-bottom: 20px;">
+            <h3>📄 Тип документа</h3>
+            <div class="doc-type-selector">
+                <button class="doc-type-btn active" data-type="gramota">📜 Грамота</button>
+                <button class="doc-type-btn" data-type="diploma">🎓 Диплом</button>
+                <button class="doc-type-btn" data-type="appendix">📎 Приложение к диплому</button>
+            </div>
+        </div>
+
+        <!-- Настройки для грамоты -->
+        <div id="gramota-settings" class="doc-settings active">
+            <div class="custom-layout">
+                <div class="list-card bg-selection-card">
+                    <h3>🎨 Выбор фона</h3>
+                    <div class="bg-preview-list">
+                        <div class="bg-preview" data-bg="custom_bg_1.png" style="background-image: url('custom_bg_1.png');"></div>
+                        <div class="bg-preview" data-bg="custom_bg_2.png" style="background-image: url('custom_bg_2.png');"></div>
+                        <div class="bg-preview" data-bg="custom_bg_3.png" style="background-image: url('custom_bg_3.png');"></div>
+                    </div>
+                </div>
+                <div class="list-card text-editor-card">
+                    <h3>✏️ Текст грамоты</h3>
+                    <input type="text" id="customTitle" value="ПОЧЁТНАЯ ГРАМОТА" placeholder="Заголовок" class="custom-input">
+                    <input type="text" id="customAwarded" value="вручается" placeholder="Текст перед именем" class="custom-input">
+                    <textarea id="customDescription" rows="3" placeholder="Основное описание" class="custom-input"></textarea>
+                    <textarea id="customDescription2" rows="4" placeholder="Дополнительное описание" class="custom-input">Администрация Компьютерной Академии ТОП выражает искреннюю благодарность за высокий уровень профессионализма, ответственное отношение к образовательному процессу и значительный вклад в развитие учебной деятельности филиала.</textarea>
+                    <div class="director-fields">
+                        <label>ФИО директора:</label>
+                        <input type="text" id="directorName" value="Горбунова Наталья" class="custom-input">
+                        <label>Должность:</label>
+                        <input type="text" id="directorTitle" value="Директор" class="custom-input">
+                    </div>
                 </div>
             </div>
-            <div class="list-card text-editor-card">
-                <h3>✏️ Текст грамоты</h3>
-                <input type="text" id="customTitle" value="ПОЧЁТНАЯ ГРАМОТА" placeholder="Заголовок" class="custom-input">
-                <input type="text" id="customAwarded" value="вручается" placeholder="Текст перед именем" class="custom-input">
-                <textarea id="customDescription" rows="4" placeholder="Основное описание" class="custom-input"></textarea>
-                <textarea id="customDescription2" rows="4" placeholder="Дополнительное описание" class="custom-input">Администрация Компьютерной Академии ТОП выражает искреннюю благодарность за высокий уровень профессионализма, ответственное отношение к образовательному процессу и значительный вклад в развитие учебной деятельности филиала.</textarea>
-                <div class="director-fields">
-                    <label>ФИО директора:</label>
-                    <input type="text" id="directorName" value="Горбунова Наталья" class="custom-input">
-                    <label>Должность:</label>
-                    <input type="text" id="directorTitle" value="Директор" class="custom-input">
+        </div>
+
+        <!-- Настройки для диплома -->
+        <div id="diploma-settings" class="doc-settings">
+            <div class="custom-layout">
+                <div class="list-card bg-selection-card">
+                    <h3>🎨 Выбор фона</h3>
+                    <div class="bg-preview-list">
+                        <div class="bg-preview" data-bg="diploma_bg_1.png" style="background-image: url('diploma_bg_1.png');"></div>
+                        <div class="bg-preview" data-bg="diploma_bg_2.png" style="background-image: url('diploma_bg_2.png');"></div>
+                        <div class="bg-preview" data-bg="diploma_bg_3.png" style="background-image: url('diploma_bg_3.png');"></div>
+                    </div>
+                </div>
+                <div class="list-card text-editor-card">
+                    <h3>✏️ Данные диплома</h3>
+                    <input type="text" id="diplomaTitle" value="ДИПЛОМ" placeholder="Заголовок" class="custom-input">
+                    <input type="text" id="diplomaSubtitle" value="Малой Компьютерной Академии ТОП" placeholder="Подзаголовок" class="custom-input">
+                    <input type="text" id="diplomaNumber" value="0000001" placeholder="Номер (7 цифр)" class="custom-input">
+                    <input type="text" id="diplomaDateFrom" value="01.09.2024" placeholder="Дата начала" class="custom-input">
+                    <input type="text" id="diplomaDateTo" value="31.05.2025" placeholder="Дата окончания" class="custom-input">
+                    <input type="text" id="diplomaPeriodText" value="прошел обучение по программе" placeholder="Текст периода" class="custom-input">
+                    <input type="text" id="diplomaProgram" value="Малой Компьютерной Академии ТОП" placeholder="Название программы" class="custom-input">
+                    <input type="text" id="diplomaCity" value="Батайск" placeholder="Город" class="custom-input">
+                    <input type="text" id="diplomaYear" value="2026" placeholder="Год" class="custom-input">
+                    <div class="director-fields">
+                        <label>ФИО директора:</label>
+                        <input type="text" id="diplomaDirectorName" value="Горбунова Наталья" class="custom-input">
+                        <label>Должность:</label>
+                        <input type="text" id="diplomaDirectorTitle" value="Директор" class="custom-input">
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Настройки для приложения к диплому -->
+        <div id="appendix-settings" class="doc-settings">
+            <div class="custom-layout">
+                <div class="list-card bg-selection-card">
+                    <h3>🎨 Выбор фона</h3>
+                    <div class="bg-preview-list">
+                        <div class="bg-preview" data-bg="appendix_bg_1.png" style="background-image: url('appendix_bg_1.png');"></div>
+                        <div class="bg-preview" data-bg="appendix_bg_2.png" style="background-image: url('appendix_bg_2.png');"></div>
+                        <div class="bg-preview" data-bg="appendix_bg_3.png" style="background-image: url('appendix_bg_3.png');"></div>
+                    </div>
+                </div>
+                <div class="list-card text-editor-card">
+                    <h3>✏️ Данные приложения</h3>
+                    <input type="text" id="appendixTitle" value="Приложение к диплому" placeholder="Заголовок" class="custom-input">
+                    <input type="text" id="appendixNumber" value="0000001" placeholder="Номер диплома (7 цифр)" class="custom-input">
+                    <input type="text" id="appendixDateFrom" value="01.09.2024" placeholder="Дата начала" class="custom-input">
+                    <input type="text" id="appendixDateTo" value="31.05.2025" placeholder="Дата окончания" class="custom-input">
+                    <input type="text" id="appendixPeriodText" value="прошел обучение по программе" placeholder="Текст периода" class="custom-input">
+                    <input type="text" id="appendixProgram" value="Малой Компьютерной Академии ТОП" placeholder="Название программы" class="custom-input">
+                    <input type="text" id="appendixSubjectsTitle" value="За время обучения сдал экзамены и зачеты по следующим дисциплинам:" placeholder="Заголовок дисциплин" class="custom-input">
+                    <textarea id="appendixSubjects" rows="6" placeholder="Дисциплины (название,оценка,словом через запятую)" class="custom-input">Робототехника и техника,12,Отлично
+Фотолаборатория,12,Отлично
+Игровой Дизайн (GIMP),12,Отлично
+Разработка приложений на Python Middle,-,Прослушано
+</textarea>
                 </div>
             </div>
         </div>
