@@ -336,7 +336,8 @@ function generateAppendixHTML(name, isPreview = false) {
     return `
         <div class="certificate cert-appendix ${previewClass}" style="${bgStyle} color: #1e1a2f;">
             <div class="cert-content">
-                <div class="appendix-title" style="color: #1e1a2f;">${escapeHtml(title)} № ${escapeHtml(appendixNumber)}</div>
+                <div class="appendix-title" style="color: #1e1a2f;">${escapeHtml(title)}</div>
+                <div class="appendix-title" style="color: #1e1a2f;">№ ${escapeHtml(appendixNumber)}</div>
                 <div class="appendix-name" style="color: #1e1a2f;">${safeName}</div>
                 <div class="name-underline"></div>
                 <div class="appendix-period" style="color: #1e1a2f;">с ${escapeHtml(dateFrom)} по ${escapeHtml(dateTo)} ${escapeHtml(periodText)}</div>
